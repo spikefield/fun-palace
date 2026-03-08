@@ -23,6 +23,7 @@ pub fn run() {
             commands::eleventy::eleventy_build,
             commands::eleventy::eleventy_stop,
             commands::eleventy::eleventy_status,
+            commands::scaffold::scaffold_project,
         ])
         .setup(|app| {
             if cfg!(debug_assertions) {
