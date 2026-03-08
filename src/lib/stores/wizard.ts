@@ -13,16 +13,24 @@ const defaultState: WizardState = {
   step: 0,
   identity: { name: '', url: '', email: '', photo: '' },
   site: { name: '', directory: '' },
-  templateLang: 'nunjucks',
+  templateLang: 'webc',
   css: 'vanilla',
   indieweb: { webmention: true, micropub: true, indieauth: true },
 };
 
 export const wizard = writable<WizardState>({ ...defaultState });
 
-export const totalSteps = 7;
+export const totalSteps = 6;
 
 export const progress = derived(wizard, ($w) => $w.step / (totalSteps - 1));
+
+export const canAdvance = derived(wizard, ($w) => {
+  switch ($w.step) {
+    case 0: return $w.identity.name.trim() !== '' && $w.identity.url.trim() !== '';
+    case 1: return $w.site.name.trim() !== '' && $w.site.directory.trim() !== '';
+    default: return true;
+  }
+});
 
 export function nextStep() {
   wizard.update((s) => ({ ...s, step: Math.min(s.step + 1, totalSteps - 1) }));

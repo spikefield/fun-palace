@@ -64,7 +64,7 @@
     padding: 1.25rem; cursor: pointer; transition: all 0.15s; color: var(--color-text);
   }
   .option:hover { border-color: var(--color-primary); }
-  .option.selected { border-color: var(--color-primary); background: #1e1b4b; }
+  .option.selected { border-color: var(--color-primary); background: var(--color-selected); }
   .option h3 { font-size: 1rem; margin-bottom: 0.25rem; display: flex; align-items: center; gap: 0.5rem; }
   .badge { font-size: 0.65rem; background: #4ade80; color: #000; padding: 0.15rem 0.5rem; border-radius: 99px; font-weight: 600; }
   .option p { color: var(--color-text-muted); font-size: 0.85rem; line-height: 1.5; margin-bottom: 0.5rem; }

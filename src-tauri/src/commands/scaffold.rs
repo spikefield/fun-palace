@@ -88,23 +88,51 @@ pub async fn scaffold_project(
     app: AppHandle,
     options: ScaffoldOptions,
 ) -> Result<ProjectEntry, TwelvetyError> {
-    let template_dir = app
+    let resource_path = app
         .path()
         .resource_dir()
         .unwrap()
         .join("templates")
         .join(&options.starter);
 
-    if !template_dir.exists() {
+    // In dev mode, resource_dir doesn't contain templates — fall back to source tree
+    let dev_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .parent()
+        .unwrap()
+        .join("templates")
+        .join(&options.starter);
+
+    let template_dir = if resource_path.exists() {
+        resource_path
+    } else if dev_path.exists() {
+        dev_path
+    } else {
         return Err(TwelvetyError {
             code: "TEMPLATE_NOT_FOUND".to_string(),
             message: format!("Starter template '{}' not found", options.starter),
         });
-    }
+    };
 
     copy_dir_recursive(&template_dir, &options.directory)?;
     customize_site_data(&options.directory, &options)?;
     write_twelvety_config(&options.directory, &options)?;
+
+    // Install dependencies
+    let install = std::process::Command::new("npm")
+        .arg("install")
+        .current_dir(&options.directory)
+        .output()
+        .map_err(|e| TwelvetyError {
+            code: "NPM_INSTALL_ERROR".to_string(),
+            message: format!("Failed to run npm install: {}", e),
+        })?;
+    if !install.status.success() {
+        let stderr = String::from_utf8_lossy(&install.stderr);
+        return Err(TwelvetyError {
+            code: "NPM_INSTALL_FAILED".to_string(),
+            message: format!("npm install failed:\n{}", stderr),
+        });
+    }
 
     let entry = ProjectEntry {
         id: uuid::Uuid::new_v4().to_string(),

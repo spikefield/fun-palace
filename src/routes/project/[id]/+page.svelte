@@ -27,6 +27,11 @@
     try {
       await invoke('eleventy_serve', { projectId: data.projectId });
       serving = true;
+      // Give Eleventy a moment to start, then open browser
+      setTimeout(async () => {
+        const { open } = await import('@tauri-apps/plugin-shell');
+        await open('http://localhost:8080');
+      }, 2000);
     } catch (e: unknown) {
       const err = e as { message?: string };
       errorMsg = err.message ?? 'Failed to start dev server';

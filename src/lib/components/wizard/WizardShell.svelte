@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { wizard, totalSteps, nextStep, prevStep } from '$lib/stores/wizard';
+  import { wizard, totalSteps, nextStep, prevStep, canAdvance } from '$lib/stores/wizard';
 
   let { children } = $props();
 </script>
@@ -21,10 +21,10 @@
     {#if $wizard.step > 0}
       <button class="btn btn-back" onclick={prevStep}>&larr; Back</button>
     {:else}
-      <div></div>
+      <a href="/" class="btn btn-back">&larr; Dashboard</a>
     {/if}
     {#if $wizard.step < totalSteps - 1}
-      <button class="btn btn-next" onclick={nextStep}>Next &rarr;</button>
+      <button class="btn btn-next" onclick={nextStep} disabled={!$canAdvance}>Next &rarr;</button>
     {/if}
   </div>
 </div>
@@ -41,5 +41,6 @@
   .btn { padding: 0.75rem 1.5rem; border-radius: var(--radius); font-weight: 600; }
   .btn-back { background: transparent; color: var(--color-text-muted); }
   .btn-next { background: var(--color-primary); color: white; }
-  .btn-next:hover { background: var(--color-primary-hover); }
+  .btn-next:hover:not(:disabled) { background: var(--color-primary-hover); }
+  .btn-next:disabled { opacity: 0.4; cursor: not-allowed; }
 </style>

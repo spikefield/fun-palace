@@ -28,9 +28,8 @@ impl ProcessManager {
             let _ = child.kill();
         }
 
-        let child = Command::new(node_path)
-            .arg(eleventy_path)
-            .arg("--serve")
+        let child = Command::new(eleventy_path)
+            .args(["@11ty/eleventy", "--serve"])
             .current_dir(project_dir)
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
@@ -51,8 +50,8 @@ impl ProcessManager {
         node_path: &str,
         eleventy_path: &str,
     ) -> Result<String, TwelvetyError> {
-        let output = Command::new(node_path)
-            .arg(eleventy_path)
+        let output = Command::new(eleventy_path)
+            .args(["@11ty/eleventy"])
             .current_dir(project_dir)
             .output()
             .map_err(|e| TwelvetyError {

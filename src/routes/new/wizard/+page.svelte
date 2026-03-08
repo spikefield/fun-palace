@@ -2,7 +2,6 @@
   import { onMount } from 'svelte';
   import { wizard, resetWizard } from '$lib/stores/wizard';
   import WizardShell from '$lib/components/wizard/WizardShell.svelte';
-  import Welcome from '$lib/components/wizard/Welcome.svelte';
   import Identity from '$lib/components/wizard/Identity.svelte';
   import SiteBasics from '$lib/components/wizard/SiteBasics.svelte';
   import TemplateLang from '$lib/components/wizard/TemplateLang.svelte';
@@ -15,18 +14,16 @@
 
 <WizardShell>
   {#if $wizard.step === 0}
-    <Welcome />
-  {:else if $wizard.step === 1}
     <Identity />
-  {:else if $wizard.step === 2}
+  {:else if $wizard.step === 1}
     <SiteBasics />
-  {:else if $wizard.step === 3}
+  {:else if $wizard.step === 2}
     <TemplateLang />
-  {:else if $wizard.step === 4}
+  {:else if $wizard.step === 3}
     <Styling />
-  {:else if $wizard.step === 5}
+  {:else if $wizard.step === 4}
     <IndieWeb />
-  {:else if $wizard.step === 6}
+  {:else if $wizard.step === 5}
     <Review />
   {/if}
 </WizardShell>
