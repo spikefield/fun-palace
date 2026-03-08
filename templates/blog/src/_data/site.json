@@ -1,0 +1,12 @@
+{
+  "title": "My Site",
+  "url": "https://example.com",
+  "description": "A personal site on the indieweb",
+  "language": "en",
+  "author": {
+    "name": "Your Name",
+    "url": "https://example.com",
+    "email": "you@example.com",
+    "photo": "/img/avatar.jpg"
+  }
+}
