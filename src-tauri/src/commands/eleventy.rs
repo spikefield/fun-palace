@@ -17,10 +17,8 @@ pub async fn eleventy_serve(
     })?;
 
     let project_dir = project.path.clone();
-    let node_path = "node";
-    let eleventy_path = "npx";
 
-    process_manager.serve(&project_id, &project_dir, node_path, eleventy_path)
+    process_manager.serve(&project_id, &project_dir, "npx")
 }
 
 #[tauri::command]
@@ -37,10 +35,8 @@ pub async fn eleventy_build(
     })?;
 
     let project_dir = project.path.clone();
-    let node_path = "node";
-    let eleventy_path = "npx";
 
-    process_manager.build(&project_dir, node_path, eleventy_path)
+    process_manager.build(&project_dir, "npx")
 }
 
 #[tauri::command]

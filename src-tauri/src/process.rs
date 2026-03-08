@@ -19,7 +19,6 @@ impl ProcessManager {
         &self,
         project_id: &str,
         project_dir: &PathBuf,
-        node_path: &str,
         eleventy_path: &str,
     ) -> Result<u32, TwelvetyError> {
         let mut procs = self.processes.lock().unwrap();
@@ -47,7 +46,6 @@ impl ProcessManager {
     pub fn build(
         &self,
         project_dir: &PathBuf,
-        node_path: &str,
         eleventy_path: &str,
     ) -> Result<String, TwelvetyError> {
         let output = Command::new(eleventy_path)
@@ -82,6 +80,7 @@ impl ProcessManager {
         Ok(())
     }
 
+    #[allow(dead_code)]
     pub fn stop_all(&self) {
         let mut procs = self.processes.lock().unwrap();
         for (_, mut child) in procs.drain() {
