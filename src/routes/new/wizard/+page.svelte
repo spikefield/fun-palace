@@ -8,6 +8,7 @@
   import TemplateLang from '$lib/components/wizard/TemplateLang.svelte';
   import Styling from '$lib/components/wizard/Styling.svelte';
   import IndieWeb from '$lib/components/wizard/IndieWeb.svelte';
+  import Review from '$lib/components/wizard/Review.svelte';
 
   onMount(() => resetWizard());
 </script>
@@ -25,7 +26,7 @@
     <Styling />
   {:else if $wizard.step === 5}
     <IndieWeb />
-  {:else}
-    <p>Step {$wizard.step + 1} coming soon...</p>
+  {:else if $wizard.step === 6}
+    <Review />
   {/if}
 </WizardShell>
