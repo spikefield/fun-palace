@@ -52,7 +52,7 @@
 </script>
 
 <header>
-  <a href="/new/wizard">&larr; Back to wizard</a>
+  <a href="/">&larr; Dashboard</a>
   <h1>Advanced Create</h1>
 </header>
 
