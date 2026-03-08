@@ -1,0 +1,9 @@
+node_modules/
+build/
+.svelte-kit/
+src-tauri/target/
+_site/
+.DS_Store
+*.env
+*.env.*
+.worktrees/
