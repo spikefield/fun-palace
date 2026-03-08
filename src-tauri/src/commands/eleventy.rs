@@ -9,11 +9,7 @@ pub async fn eleventy_serve(
     process_manager: State<'_, ProcessManager>,
     project_id: String,
 ) -> Result<u32, TwelvetyError> {
-    let registry_path = app
-        .path()
-        .app_data_dir()
-        .unwrap()
-        .join("projects.json");
+    let registry_path = app.path().app_data_dir().unwrap().join("projects.json");
     let registry = ProjectRegistry::load(&registry_path)?;
     let project = registry.find(&project_id).ok_or_else(|| TwelvetyError {
         code: "PROJECT_NOT_FOUND".to_string(),
@@ -33,11 +29,7 @@ pub async fn eleventy_build(
     process_manager: State<'_, ProcessManager>,
     project_id: String,
 ) -> Result<String, TwelvetyError> {
-    let registry_path = app
-        .path()
-        .app_data_dir()
-        .unwrap()
-        .join("projects.json");
+    let registry_path = app.path().app_data_dir().unwrap().join("projects.json");
     let registry = ProjectRegistry::load(&registry_path)?;
     let project = registry.find(&project_id).ok_or_else(|| TwelvetyError {
         code: "PROJECT_NOT_FOUND".to_string(),

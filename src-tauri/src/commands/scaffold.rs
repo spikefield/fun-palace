@@ -75,9 +75,7 @@ fn write_twelvety_config(project_dir: &Path, opts: &ScaffoldOptions) -> Result<(
         opts.name,
         opts.template_lang,
         opts.css,
-        opts.site_url
-            .replace("https://", "")
-            .replace("http://", ""),
+        opts.site_url.replace("https://", "").replace("http://", ""),
         opts.author_name,
         opts.author_url,
     );
