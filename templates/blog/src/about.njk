@@ -1,0 +1,15 @@
+---
+layout: base.njk
+title: About
+---
+<div class="h-card">
+  {% if site.author.photo %}
+  <img class="u-photo" src="{{ site.author.photo }}" alt="{{ site.author.name }}">
+  {% endif %}
+  <h1 class="p-name">{{ site.author.name }}</h1>
+  <p class="p-note">This is your personal bio. Edit it in <code>src/about.njk</code>.</p>
+  <a class="u-url u-uid" rel="me" href="{{ site.author.url }}">{{ site.author.url }}</a>
+  {% if site.author.email %}
+  <a class="u-email" href="mailto:{{ site.author.email }}">{{ site.author.email }}</a>
+  {% endif %}
+</div>

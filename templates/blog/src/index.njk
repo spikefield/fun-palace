@@ -1,0 +1,21 @@
+---
+layout: base.njk
+title: Home
+---
+<section class="h-feed">
+  <h1 class="p-name">{{ site.title }}</h1>
+
+  {%- for post in collections.posts | reverse %}
+  <article class="h-entry">
+    <h2 class="p-name">
+      <a class="u-url" href="{{ post.url }}">{{ post.data.title }}</a>
+    </h2>
+    <time class="dt-published" datetime="{{ post.date | dateToRfc3339 }}">
+      {{ post.date }}
+    </time>
+    {% if post.data.description %}
+    <p class="p-summary">{{ post.data.description }}</p>
+    {% endif %}
+  </article>
+  {%- endfor %}
+</section>

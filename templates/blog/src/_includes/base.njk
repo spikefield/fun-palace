@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="{{ site.language | default('en') }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% if title %}{{ title }} — {% endif %}{{ site.title }}</title>
+  <meta name="description" content="{{ description | default(site.description) }}">
+
+  <!-- IndieWeb endpoints -->
+  <link rel="authorization_endpoint" href="https://indieauth.com/auth">
+  <link rel="token_endpoint" href="https://tokens.indieauth.com/token">
+  <link rel="webmention" href="{{ site.url }}/webmention">
+  <link rel="micropub" href="{{ site.url }}/micropub">
+
+  <!-- Feeds -->
+  <link rel="alternate" type="application/atom+xml" title="Atom Feed" href="/feed.xml">
+  <link rel="alternate" type="application/feed+json" title="JSON Feed" href="/feed.json">
+
+  {% if site.author.url %}<link rel="me" href="{{ site.author.url }}">{% endif %}
+</head>
+<body>
+  <header>
+    <nav>
+      <a href="/" class="site-title">{{ site.title }}</a>
+      <a href="/about/">About</a>
+    </nav>
+  </header>
+
+  <main>
+    {{ content | safe }}
+  </main>
+
+  <footer>
+    <div class="h-card" rel="author">
+      {% if site.author.photo %}
+      <img class="u-photo" src="{{ site.author.photo }}" alt="{{ site.author.name }}">
+      {% endif %}
+      <a class="p-name u-url u-uid" rel="me" href="{{ site.author.url }}">{{ site.author.name }}</a>
+      {% if site.author.email %}
+      <a class="u-email" href="mailto:{{ site.author.email }}">{{ site.author.email }}</a>
+      {% endif %}
+    </div>
+  </footer>
+</body>
+</html>
