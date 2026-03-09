@@ -207,9 +207,6 @@
       </div>
 
     {:else if flow === 'import'}
-      <!-- User chose import -->
-      <div class="user-turn">Import an existing site</div>
-
       {#if importStage === 'detecting'}
         <div class="palace-turn">
           <p class="body">Scanning {importDir}...</p>
@@ -250,9 +247,6 @@
       {/if}
 
     {:else if flow === 'create'}
-      <!-- User chose create -->
-      <div class="user-turn">Create a new site</div>
-
       <!-- Step 0: Identity -->
       {#if createStep >= 0}
         {#if createStep > 0}
