@@ -16,12 +16,18 @@
     try {
       const projects = await invoke<ProjectEntry[]>('list_projects');
       project = projects.find((p) => p.id === data.projectId) ?? null;
-      if (project) {
-        serving = await invoke<boolean>('eleventy_status', { projectId: data.projectId });
-      }
     } catch (e: unknown) {
       const err = e as { message?: string };
       errorMsg = err.message ?? 'Failed to load project';
+      return;
+    }
+    if (project) {
+      try {
+        serving = await invoke<boolean>('eleventy_status', { projectId: data.projectId });
+      } catch {
+        // Status check can fail silently — just means not serving
+        serving = false;
+      }
     }
   }
 
@@ -99,7 +105,11 @@
 
     {#if errorMsg}
       <PalaceTurn>
-        <p class="error">{errorMsg}</p>
+        <p>Something went wrong:</p>
+        <pre class="output error">{errorMsg}</pre>
+        <Choices>
+          <Choice onclick={() => { errorMsg = ''; }}>Dismiss</Choice>
+        </Choices>
       </PalaceTurn>
     {/if}
 
