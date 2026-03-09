@@ -43,19 +43,21 @@
     max-width: 520px;
   }
   .message {
+    font-family: var(--font-palace);
     margin-bottom: 2rem;
   }
   .greeting {
-    font-size: 1.25rem;
+    font-size: 1.15rem;
     margin-bottom: 0.5rem;
   }
   .message p {
     color: var(--color-text-muted);
-    line-height: 1.6;
+    line-height: 1.7;
+    font-size: 0.875rem;
   }
   .message strong {
     color: var(--color-text);
-    font-weight: 700;
+    font-weight: 600;
   }
   .choices {
     display: flex;
@@ -63,6 +65,7 @@
     gap: 0.5rem;
   }
   .choice {
+    font-family: var(--font-user);
     text-align: left;
     padding: 0.75rem 1rem;
     background: var(--color-surface);
