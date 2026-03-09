@@ -21,10 +21,6 @@
     <h3>Import</h3>
     <p>Bring in an existing Eleventy project.</p>
   </a>
-  <a href="/new/advanced" class="action-card">
-    <h3>Quick Start</h3>
-    <p>All options on one form.</p>
-  </a>
 </div>
 
 {#if $loading}
@@ -62,7 +58,7 @@
   }
   .actions {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 1px;
     background: var(--color-border);
     border: 1px solid var(--color-border);

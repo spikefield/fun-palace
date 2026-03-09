@@ -28,12 +28,6 @@
     </div>
   </button>
 
-  <button class="option" onclick={() => goto('/new/advanced')}>
-    <div>
-      <h3>Advanced create</h3>
-      <p>I know what I'm doing — just give me the options.</p>
-    </div>
-  </button>
 </div>
 
 <style>
