@@ -79,6 +79,36 @@ fn customize_eleventy_config(
     Ok(())
 }
 
+fn rename_template_extensions(
+    project_dir: &Path,
+    opts: &ScaffoldOptions,
+) -> Result<(), FunPalaceError> {
+    let ext = match opts.template_lang.as_str() {
+        "liquid" => "liquid",
+        "webc" => "webc",
+        _ => return Ok(()),
+    };
+
+    rename_njk_files_recursive(&project_dir.join("src"), ext)
+}
+
+fn rename_njk_files_recursive(dir: &Path, new_ext: &str) -> Result<(), FunPalaceError> {
+    if !dir.exists() {
+        return Ok(());
+    }
+    for entry in std::fs::read_dir(dir)? {
+        let entry = entry?;
+        let path = entry.path();
+        if path.is_dir() {
+            rename_njk_files_recursive(&path, new_ext)?;
+        } else if path.extension().and_then(|e| e.to_str()) == Some("njk") {
+            let new_path = path.with_extension(new_ext);
+            std::fs::rename(&path, &new_path)?;
+        }
+    }
+    Ok(())
+}
+
 fn write_funpalace_config(project_dir: &Path, opts: &ScaffoldOptions) -> Result<(), FunPalaceError> {
     let config = format!(
         r#"export default {{
@@ -144,6 +174,7 @@ pub async fn scaffold_project(
     copy_dir_recursive(&template_dir, &options.directory)?;
     customize_site_data(&options.directory, &options)?;
     customize_eleventy_config(&options.directory, &options)?;
+    rename_template_extensions(&options.directory, &options)?;
     write_funpalace_config(&options.directory, &options)?;
 
     // Install dependencies
@@ -274,6 +305,60 @@ mod tests {
         assert!(content.contains(r#"title: "Alice's Garden""#));
         assert!(content.contains(r#"url: "https://alice.example""#));
         assert!(content.contains(r#"author: "Alice""#));
+    }
+
+    #[test]
+    fn test_rename_template_extensions_webc() {
+        let dir = tempfile::tempdir().unwrap();
+        let src = dir.path().join("src");
+        let includes = src.join("_includes");
+        std::fs::create_dir_all(&includes).unwrap();
+        std::fs::write(src.join("index.njk"), "index").unwrap();
+        std::fs::write(src.join("about.njk"), "about").unwrap();
+        std::fs::write(includes.join("base.njk"), "base").unwrap();
+        std::fs::write(src.join("keep.md"), "markdown").unwrap();
+
+        let opts = ScaffoldOptions {
+            name: "Test".to_string(),
+            directory: dir.path().to_path_buf(),
+            starter: "blog".to_string(),
+            template_lang: "webc".to_string(),
+            css: "vanilla".to_string(),
+            author_name: "".to_string(),
+            author_url: "".to_string(),
+            site_url: "".to_string(),
+        };
+
+        rename_template_extensions(dir.path(), &opts).unwrap();
+
+        assert!(src.join("index.webc").exists());
+        assert!(src.join("about.webc").exists());
+        assert!(includes.join("base.webc").exists());
+        assert!(src.join("keep.md").exists());
+        assert!(!src.join("index.njk").exists());
+    }
+
+    #[test]
+    fn test_rename_template_extensions_nunjucks_noop() {
+        let dir = tempfile::tempdir().unwrap();
+        let src = dir.path().join("src");
+        std::fs::create_dir_all(&src).unwrap();
+        std::fs::write(src.join("index.njk"), "index").unwrap();
+
+        let opts = ScaffoldOptions {
+            name: "Test".to_string(),
+            directory: dir.path().to_path_buf(),
+            starter: "blog".to_string(),
+            template_lang: "nunjucks".to_string(),
+            css: "vanilla".to_string(),
+            author_name: "".to_string(),
+            author_url: "".to_string(),
+            site_url: "".to_string(),
+        };
+
+        rename_template_extensions(dir.path(), &opts).unwrap();
+
+        assert!(src.join("index.njk").exists());
     }
 
     #[test]
