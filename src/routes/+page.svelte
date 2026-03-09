@@ -96,12 +96,15 @@
     registering = true;
     try {
       const name = importDir.split('/').pop() || 'Imported Site';
-      await invoke('add_project', {
+      const entry: ProjectEntry = {
+        id: crypto.randomUUID(),
         name,
         path: importDir,
-        templateLang: importResult.template_lang || 'nunjucks',
-        cssApproach: 'vanilla',
-      });
+        created_at: new Date().toISOString(),
+        template_lang: importResult.template_lang || 'nunjucks',
+        css_approach: 'vanilla',
+      };
+      await invoke('add_project', { entry });
       await loadProjects();
       flow = 'idle';
       importStage = 'idle';
@@ -223,7 +226,7 @@
           <div class="summary">
             <div class="row"><span class="label">Location</span><span class="value mono">{importDir}</span></div>
             <div class="row"><span class="label">Template language</span><span class="value">{importResult.template_lang || 'Not detected'}</span></div>
-            <div class="row"><span class="label">Content files</span><span class="value">{importResult.post_count} markdown files</span></div>
+            <div class="row"><span class="label">Markdown files</span><span class="value">{importResult.post_count}</span></div>
             <div class="row"><span class="label">IndieWeb markup</span><span class="value">{importResult.has_indieweb_markup ? 'Found' : 'Not found'}</span></div>
             <div class="row"><span class="label">Feeds</span><span class="value">{importResult.has_feeds ? 'Found' : 'Not found'}</span></div>
           </div>
