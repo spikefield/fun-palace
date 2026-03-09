@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   let { rows }: { rows: Array<{ label: string; value: string; mono?: boolean }> } = $props();
 </script>
 
