@@ -70,7 +70,10 @@ fn customize_eleventy_config(
     let updated = content
         .replace(r#"["md", "njk", "html"]"#, formats)
         .replace(r#"markdownTemplateEngine: "njk""#, &format!("markdownTemplateEngine: {engine}"))
-        .replace(r#"htmlTemplateEngine: "njk""#, &format!("htmlTemplateEngine: {engine}"));
+        .replace(r#"htmlTemplateEngine: "njk""#, &format!("htmlTemplateEngine: {engine}"))
+        .replace(r#"title: "My Site""#, &format!(r#"title: "{}""#, opts.name))
+        .replace(r#"url: "https://example.com""#, &format!(r#"url: "{}""#, opts.site_url))
+        .replace(r#"author: "Your Name""#, &format!(r#"author: "{}""#, opts.author_name));
 
     std::fs::write(&config_path, updated)?;
     Ok(())
@@ -238,7 +241,12 @@ mod tests {
         let dir = tempfile::tempdir().unwrap();
         std::fs::write(
             dir.path().join("eleventy.config.js"),
-            r#"  return {
+            r#"  const siteData = {
+    title: "My Site",
+    url: "https://example.com",
+    author: "Your Name",
+  };
+  return {
     templateFormats: ["md", "njk", "html"],
     markdownTemplateEngine: "njk",
     htmlTemplateEngine: "njk",
@@ -247,14 +255,14 @@ mod tests {
         .unwrap();
 
         let opts = ScaffoldOptions {
-            name: "Test".to_string(),
+            name: "Alice's Garden".to_string(),
             directory: dir.path().to_path_buf(),
             starter: "blog".to_string(),
             template_lang: "webc".to_string(),
             css: "vanilla".to_string(),
-            author_name: "".to_string(),
-            author_url: "".to_string(),
-            site_url: "".to_string(),
+            author_name: "Alice".to_string(),
+            author_url: "https://alice.example".to_string(),
+            site_url: "https://alice.example".to_string(),
         };
 
         customize_eleventy_config(dir.path(), &opts).unwrap();
@@ -263,6 +271,9 @@ mod tests {
         assert!(content.contains(r#"["md", "webc", "html"]"#));
         assert!(content.contains(r#"markdownTemplateEngine: "webc""#));
         assert!(content.contains(r#"htmlTemplateEngine: "webc""#));
+        assert!(content.contains(r#"title: "Alice's Garden""#));
+        assert!(content.contains(r#"url: "https://alice.example""#));
+        assert!(content.contains(r#"author: "Alice""#));
     }
 
     #[test]
