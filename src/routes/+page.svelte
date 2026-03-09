@@ -4,7 +4,7 @@
   import { invoke } from '@tauri-apps/api/core';
   import { projects, loadProjects } from '$lib/stores/projects';
   import { wizard, resetWizard, updateIdentity, updateSite, updateIndieweb } from '$lib/stores/wizard';
-  import { Thread, PalaceTurn, UserTurn, Choices, Choice, Fields, Summary } from '$lib/components/conversation';
+  import { Thread, PalaceTurn, Choices, Choice, Fields, Summary } from '$lib/components/conversation';
   import type { ProjectEntry, ScaffoldOptions } from '$lib/types';
 
   type Flow = 'idle' | 'create' | 'import';
@@ -245,165 +245,142 @@
 
     {:else if flow === 'create'}
       <!-- Step 0: Identity -->
-      {#if createStep >= 0}
-        {#if createStep > 0}
-          <PalaceTurn done><p>Who are you on the web?</p></PalaceTurn>
-          <UserTurn>{$wizard.identity.name} · {$wizard.identity.url}</UserTurn>
-        {:else}
-          <PalaceTurn>
-            <p>First, who are you on the web? On the indieweb, your identity lives on your own domain.</p>
-            <Fields>
-              <label>
-                <span class="field-label">Your Name</span>
-                <input type="text" value={$wizard.identity.name}
-                  oninput={(e) => updateIdentity({ name: e.currentTarget.value })}
-                  placeholder="Alice Example">
-              </label>
-              <label>
-                <span class="field-label">Your Website URL</span>
-                <input type="url" value={$wizard.identity.url}
-                  oninput={(e) => updateIdentity({ url: e.currentTarget.value })}
-                  placeholder="https://alice.example.com">
-              </label>
-              <label>
-                <span class="field-label">Email <span class="optional">optional</span></span>
-                <input type="email" value={$wizard.identity.email}
-                  oninput={(e) => updateIdentity({ email: e.currentTarget.value })}
-                  placeholder="alice@example.com">
-              </label>
-            </Fields>
-            <Choices>
-              <Choice onclick={advanceCreate} disabled={!canContinueIdentity}>Continue</Choice>
-            </Choices>
-          </PalaceTurn>
+      <PalaceTurn>
+        <p>First, who are you on the web? On the indieweb, your identity lives on your own domain.</p>
+        <Fields>
+          <label>
+            <span class="field-label">Your Name</span>
+            <input type="text" value={$wizard.identity.name}
+              oninput={(e) => updateIdentity({ name: e.currentTarget.value })}
+              placeholder="Alice Example">
+          </label>
+          <label>
+            <span class="field-label">Your Website URL</span>
+            <input type="url" value={$wizard.identity.url}
+              oninput={(e) => updateIdentity({ url: e.currentTarget.value })}
+              placeholder="https://alice.example.com">
+          </label>
+          <label>
+            <span class="field-label">Email <span class="optional">optional</span></span>
+            <input type="email" value={$wizard.identity.email}
+              oninput={(e) => updateIdentity({ email: e.currentTarget.value })}
+              placeholder="alice@example.com">
+          </label>
+        </Fields>
+        {#if createStep === 0}
+          <Choices>
+            <Choice onclick={advanceCreate} disabled={!canContinueIdentity}>Continue</Choice>
+          </Choices>
         {/if}
-      {/if}
+      </PalaceTurn>
 
       <!-- Step 1: Site basics -->
       {#if createStep >= 1}
-        {#if createStep > 1}
-          <PalaceTurn done><p>What should we call your site?</p></PalaceTurn>
-          <UserTurn>{$wizard.site.name}</UserTurn>
-        {:else}
-          <PalaceTurn>
-            <p>Nice to meet you, {$wizard.identity.name}. What should we call your site?</p>
-            <Fields>
-              <label>
-                <span class="field-label">Site Name</span>
-                <input type="text" value={$wizard.site.name}
-                  oninput={(e) => updateSite({ name: e.currentTarget.value })}
-                  placeholder="Alice's Garden">
-              </label>
-              <label>
-                <span class="field-label">Save Location</span>
-                <div class="dir-picker">
-                  <input type="text" value={$wizard.site.directory} placeholder="Choose a folder..." readonly>
-                  <Choice onclick={pickDirectory}>Browse</Choice>
-                </div>
-              </label>
-            </Fields>
+        <PalaceTurn>
+          <p>Nice to meet you, {$wizard.identity.name}. What should we call your site?</p>
+          <Fields>
+            <label>
+              <span class="field-label">Site Name</span>
+              <input type="text" value={$wizard.site.name}
+                oninput={(e) => updateSite({ name: e.currentTarget.value })}
+                placeholder="Alice's Garden">
+            </label>
+            <label>
+              <span class="field-label">Save Location</span>
+              <div class="dir-picker">
+                <input type="text" value={$wizard.site.directory} placeholder="Choose a folder..." readonly>
+                <Choice onclick={pickDirectory}>Browse</Choice>
+              </div>
+            </label>
+          </Fields>
+          {#if createStep === 1}
             <Choices>
               <Choice onclick={advanceCreate} disabled={!canContinueSite}>Continue</Choice>
             </Choices>
-          </PalaceTurn>
-        {/if}
+          {/if}
+        </PalaceTurn>
       {/if}
 
       <!-- Step 2: Template language -->
       {#if createStep >= 2}
-        {#if createStep > 2}
-          <PalaceTurn done><p>How should your templates work?</p></PalaceTurn>
-          <UserTurn>{templateOptions.find(t => t.value === $wizard.templateLang)?.name ?? $wizard.templateLang}</UserTurn>
-        {:else}
-          <PalaceTurn>
-            <p>How should your templates work? Templates control how your content turns into web pages — like mail merge for the web.</p>
-            <Choices>
-              {#each templateOptions as opt}
-                <Choice
-                  selected={$wizard.templateLang === opt.value}
-                  onclick={() => selectTemplate(opt.value)}
-                >
-                  {opt.name}{#if opt.recommended} · recommended{/if}
-                </Choice>
-              {/each}
-            </Choices>
+        <PalaceTurn>
+          <p>How should your templates work? Templates control how your content turns into web pages — like mail merge for the web.</p>
+          <Choices>
+            {#each templateOptions as opt}
+              <Choice
+                selected={$wizard.templateLang === opt.value}
+                onclick={() => selectTemplate(opt.value)}
+              >
+                {opt.name}{#if opt.recommended} · recommended{/if}
+              </Choice>
+            {/each}
+          </Choices>
+          {#if createStep === 2}
             <Choices>
               <Choice onclick={advanceCreate}>Continue with {templateOptions.find(t => t.value === $wizard.templateLang)?.name}</Choice>
             </Choices>
-          </PalaceTurn>
-        {/if}
+          {/if}
+        </PalaceTurn>
       {/if}
 
       <!-- Step 3: CSS -->
       {#if createStep >= 3}
-        {#if createStep > 3}
-          <PalaceTurn done><p>How do you want to style it?</p></PalaceTurn>
-          <UserTurn>{cssOptions.find(c => c.value === $wizard.css)?.name ?? $wizard.css}</UserTurn>
-        {:else}
-          <PalaceTurn>
-            <p>And how do you want to style your site?</p>
-            <Choices>
-              {#each cssOptions as opt}
-                <Choice
-                  selected={$wizard.css === opt.value}
-                  onclick={() => selectCss(opt.value)}
-                >
-                  {opt.name}{#if opt.recommended} · recommended{/if}
-                </Choice>
-              {/each}
-            </Choices>
+        <PalaceTurn>
+          <p>And how do you want to style your site?</p>
+          <Choices>
+            {#each cssOptions as opt}
+              <Choice
+                selected={$wizard.css === opt.value}
+                onclick={() => selectCss(opt.value)}
+              >
+                {opt.name}{#if opt.recommended} · recommended{/if}
+              </Choice>
+            {/each}
+          </Choices>
+          {#if createStep === 3}
             <Choices>
               <Choice onclick={advanceCreate}>Continue with {cssOptions.find(c => c.value === $wizard.css)?.name}</Choice>
             </Choices>
-          </PalaceTurn>
-        {/if}
+          {/if}
+        </PalaceTurn>
       {/if}
 
       <!-- Step 4: IndieWeb -->
       {#if createStep >= 4}
-        {#if createStep > 4}
-          <PalaceTurn done><p>IndieWeb features?</p></PalaceTurn>
-          <UserTurn>
-            {[
-              $wizard.indieweb.webmention && 'Webmention',
-              $wizard.indieweb.micropub && 'Micropub',
-              $wizard.indieweb.indieauth && 'IndieAuth',
-            ].filter(Boolean).join(', ') || 'None'}
-          </UserTurn>
-        {:else}
-          <PalaceTurn>
-            <p>Almost there. The IndieWeb lets your site talk to others — replies, likes, and mentions work across different websites.</p>
-            <div class="toggles">
-              <label class="toggle">
-                <input type="checkbox" checked={$wizard.indieweb.webmention}
-                  onchange={(e) => updateIndieweb({ webmention: e.currentTarget.checked })}>
-                <div>
-                  <strong>Webmention</strong>
-                  <p>Cross-site @mentions — know when someone links to your post</p>
-                </div>
-              </label>
-              <label class="toggle">
-                <input type="checkbox" checked={$wizard.indieweb.micropub}
-                  onchange={(e) => updateIndieweb({ micropub: e.currentTarget.checked })}>
-                <div>
-                  <strong>Micropub</strong>
-                  <p>Post to your site from any app, not just Fun Palace</p>
-                </div>
-              </label>
-              <label class="toggle">
-                <input type="checkbox" checked={$wizard.indieweb.indieauth}
-                  onchange={(e) => updateIndieweb({ indieauth: e.currentTarget.checked })}>
-                <div>
-                  <strong>IndieAuth</strong>
-                  <p>Sign in to other sites using your own domain</p>
-                </div>
-              </label>
-            </div>
+        <PalaceTurn>
+          <p>Almost there. The IndieWeb lets your site talk to others — replies, likes, and mentions work across different websites.</p>
+          <div class="toggles">
+            <label class="toggle">
+              <input type="checkbox" checked={$wizard.indieweb.webmention}
+                onchange={(e) => updateIndieweb({ webmention: e.currentTarget.checked })}>
+              <div>
+                <strong>Webmention</strong>
+                <p>Cross-site @mentions — know when someone links to your post</p>
+              </div>
+            </label>
+            <label class="toggle">
+              <input type="checkbox" checked={$wizard.indieweb.micropub}
+                onchange={(e) => updateIndieweb({ micropub: e.currentTarget.checked })}>
+              <div>
+                <strong>Micropub</strong>
+                <p>Post to your site from any app, not just Fun Palace</p>
+              </div>
+            </label>
+            <label class="toggle">
+              <input type="checkbox" checked={$wizard.indieweb.indieauth}
+                onchange={(e) => updateIndieweb({ indieauth: e.currentTarget.checked })}>
+              <div>
+                <strong>IndieAuth</strong>
+                <p>Sign in to other sites using your own domain</p>
+              </div>
+            </label>
+          </div>
+          {#if createStep === 4}
             <Choices>
               <Choice onclick={advanceCreate}>Continue</Choice>
             </Choices>
-          </PalaceTurn>
-        {/if}
+          {/if}
+        </PalaceTurn>
       {/if}
 
       <!-- Step 5: Review & Create -->
