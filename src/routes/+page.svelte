@@ -195,19 +195,23 @@
         <button class="choice" onclick={startCreate}>
           Create a new site
         </button>
-
-        {#if $projects.length > 0}
-          {#each $projects as project}
-            <button class="choice" onclick={() => goto(`/project/${project.id}`)}>
-              Work on {project.name}
-            </button>
-          {/each}
-        {/if}
-
         <button class="choice choice-muted" onclick={startImport}>
           Import an existing site
         </button>
       </div>
+
+      {#if $projects.length > 0}
+        <div class="palace-turn">
+          <p class="body">Or pick up where you left off:</p>
+        </div>
+        <div class="site-list">
+          {#each $projects as project}
+            <button class="site-item" onclick={() => goto(`/project/${project.id}`)}>
+              {project.name}
+            </button>
+          {/each}
+        </div>
+      {/if}
 
     {:else if flow === 'import'}
       {#if importStage === 'detecting'}
@@ -636,6 +640,29 @@
 
   /* Error */
   .error { color: var(--color-danger); }
+
+  /* Site list */
+  .site-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  .site-item {
+    font-family: var(--font-user);
+    text-align: left;
+    padding: 0.5rem 0.75rem;
+    background: transparent;
+    border: none;
+    border-radius: var(--radius);
+    color: var(--color-text);
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .site-item:hover {
+    background: var(--color-surface);
+  }
 
   /* Spinner */
   .spinner {
