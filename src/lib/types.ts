@@ -18,7 +18,7 @@ export interface ScaffoldOptions {
   site_url: string;
 }
 
-export interface TwelvetyError {
+export interface FunPalaceError {
   code: string;
   message: string;
 }

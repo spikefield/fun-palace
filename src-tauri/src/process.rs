@@ -1,4 +1,4 @@
-use crate::TwelvetyError;
+use crate::FunPalaceError;
 use std::collections::HashMap;
 use std::path::PathBuf;
 use std::process::{Child, Command, Stdio};
@@ -20,7 +20,7 @@ impl ProcessManager {
         project_id: &str,
         project_dir: &PathBuf,
         eleventy_path: &str,
-    ) -> Result<u32, TwelvetyError> {
+    ) -> Result<u32, FunPalaceError> {
         let mut procs = self.processes.lock().unwrap();
 
         if let Some(mut child) = procs.remove(project_id) {
@@ -33,7 +33,7 @@ impl ProcessManager {
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
             .spawn()
-            .map_err(|e| TwelvetyError {
+            .map_err(|e| FunPalaceError {
                 code: "PROCESS_SPAWN_ERROR".to_string(),
                 message: format!("Failed to start Eleventy: {}", e),
             })?;
@@ -47,19 +47,19 @@ impl ProcessManager {
         &self,
         project_dir: &PathBuf,
         eleventy_path: &str,
-    ) -> Result<String, TwelvetyError> {
+    ) -> Result<String, FunPalaceError> {
         let output = Command::new(eleventy_path)
             .args(["@11ty/eleventy"])
             .current_dir(project_dir)
             .output()
-            .map_err(|e| TwelvetyError {
+            .map_err(|e| FunPalaceError {
                 code: "BUILD_ERROR".to_string(),
                 message: format!("Failed to run Eleventy build: {}", e),
             })?;
 
         if !output.status.success() {
             let stderr = String::from_utf8_lossy(&output.stderr);
-            return Err(TwelvetyError {
+            return Err(FunPalaceError {
                 code: "BUILD_FAILED".to_string(),
                 message: format!("Eleventy build failed:\n{}", stderr),
             });
@@ -69,10 +69,10 @@ impl ProcessManager {
         Ok(stdout.to_string())
     }
 
-    pub fn stop(&self, project_id: &str) -> Result<(), TwelvetyError> {
+    pub fn stop(&self, project_id: &str) -> Result<(), FunPalaceError> {
         let mut procs = self.processes.lock().unwrap();
         if let Some(mut child) = procs.remove(project_id) {
-            child.kill().map_err(|e| TwelvetyError {
+            child.kill().map_err(|e| FunPalaceError {
                 code: "PROCESS_KILL_ERROR".to_string(),
                 message: format!("Failed to stop process: {}", e),
             })?;

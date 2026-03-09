@@ -1,5 +1,5 @@
 use crate::models::project::{ProjectEntry, ProjectRegistry};
-use crate::TwelvetyError;
+use crate::FunPalaceError;
 use serde::Deserialize;
 use std::path::{Path, PathBuf};
 use tauri::{AppHandle, Manager};
@@ -16,7 +16,7 @@ pub struct ScaffoldOptions {
     pub site_url: String,
 }
 
-fn copy_dir_recursive(src: &Path, dst: &Path) -> Result<(), TwelvetyError> {
+fn copy_dir_recursive(src: &Path, dst: &Path) -> Result<(), FunPalaceError> {
     std::fs::create_dir_all(dst)?;
     for entry in std::fs::read_dir(src)? {
         let entry = entry?;
@@ -31,7 +31,7 @@ fn copy_dir_recursive(src: &Path, dst: &Path) -> Result<(), TwelvetyError> {
     Ok(())
 }
 
-fn customize_site_data(project_dir: &Path, opts: &ScaffoldOptions) -> Result<(), TwelvetyError> {
+fn customize_site_data(project_dir: &Path, opts: &ScaffoldOptions) -> Result<(), FunPalaceError> {
     let site_json_path = project_dir.join("src/_data/site.json");
     if site_json_path.exists() {
         let mut data: serde_json::Value =
@@ -54,7 +54,7 @@ fn customize_site_data(project_dir: &Path, opts: &ScaffoldOptions) -> Result<(),
 fn customize_eleventy_config(
     project_dir: &Path,
     opts: &ScaffoldOptions,
-) -> Result<(), TwelvetyError> {
+) -> Result<(), FunPalaceError> {
     let config_path = project_dir.join("eleventy.config.js");
     if !config_path.exists() {
         return Ok(());
@@ -76,7 +76,7 @@ fn customize_eleventy_config(
     Ok(())
 }
 
-fn write_twelvety_config(project_dir: &Path, opts: &ScaffoldOptions) -> Result<(), TwelvetyError> {
+fn write_funpalace_config(project_dir: &Path, opts: &ScaffoldOptions) -> Result<(), FunPalaceError> {
     let config = format!(
         r#"export default {{
   name: "{}",
@@ -104,7 +104,7 @@ fn write_twelvety_config(project_dir: &Path, opts: &ScaffoldOptions) -> Result<(
         opts.author_name,
         opts.author_url,
     );
-    std::fs::write(project_dir.join("twelvety.config.js"), config)?;
+    std::fs::write(project_dir.join("funpalace.config.js"), config)?;
     Ok(())
 }
 
@@ -112,7 +112,7 @@ fn write_twelvety_config(project_dir: &Path, opts: &ScaffoldOptions) -> Result<(
 pub async fn scaffold_project(
     app: AppHandle,
     options: ScaffoldOptions,
-) -> Result<ProjectEntry, TwelvetyError> {
+) -> Result<ProjectEntry, FunPalaceError> {
     let resource_path = app
         .path()
         .resource_dir()
@@ -132,7 +132,7 @@ pub async fn scaffold_project(
     } else if dev_path.exists() {
         dev_path
     } else {
-        return Err(TwelvetyError {
+        return Err(FunPalaceError {
             code: "TEMPLATE_NOT_FOUND".to_string(),
             message: format!("Starter template '{}' not found", options.starter),
         });
@@ -141,20 +141,20 @@ pub async fn scaffold_project(
     copy_dir_recursive(&template_dir, &options.directory)?;
     customize_site_data(&options.directory, &options)?;
     customize_eleventy_config(&options.directory, &options)?;
-    write_twelvety_config(&options.directory, &options)?;
+    write_funpalace_config(&options.directory, &options)?;
 
     // Install dependencies
     let install = std::process::Command::new("npm")
         .arg("install")
         .current_dir(&options.directory)
         .output()
-        .map_err(|e| TwelvetyError {
+        .map_err(|e| FunPalaceError {
             code: "NPM_INSTALL_ERROR".to_string(),
             message: format!("Failed to run npm install: {}", e),
         })?;
     if !install.status.success() {
         let stderr = String::from_utf8_lossy(&install.stderr);
-        return Err(TwelvetyError {
+        return Err(FunPalaceError {
             code: "NPM_INSTALL_FAILED".to_string(),
             message: format!("npm install failed:\n{}", stderr),
         });

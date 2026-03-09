@@ -10,12 +10,11 @@
   }
 </script>
 
-<div class="illustration">&#128193;</div>
 <h1>Name your site</h1>
 <p class="explanation">
   Every site needs a name and a home on your computer. This creates a folder
   with all your site's files — <strong>you own them completely</strong>. No cloud
-  service, no subscription. If you ever stop using Twelvety, your files are still
+  service, no subscription. If you ever stop using Fun Palace, your files are still
   there as a standard Eleventy project.
 </p>
 
@@ -38,7 +37,6 @@
 </div>
 
 <style>
-  .illustration { font-size: 3rem; margin-bottom: 1rem; }
   h1 { font-size: 1.75rem; margin-bottom: 0.75rem; }
   .explanation { color: var(--color-text-muted); line-height: 1.7; margin-bottom: 1.5rem; }
   .explanation strong { color: var(--color-text); }

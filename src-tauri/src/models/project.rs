@@ -17,7 +17,7 @@ pub struct ProjectRegistry {
 }
 
 impl ProjectRegistry {
-    pub fn load(path: &std::path::Path) -> Result<Self, crate::TwelvetyError> {
+    pub fn load(path: &std::path::Path) -> Result<Self, crate::FunPalaceError> {
         if !path.exists() {
             return Ok(Self::default());
         }
@@ -26,7 +26,7 @@ impl ProjectRegistry {
         Ok(registry)
     }
 
-    pub fn save(&self, path: &std::path::Path) -> Result<(), crate::TwelvetyError> {
+    pub fn save(&self, path: &std::path::Path) -> Result<(), crate::FunPalaceError> {
         let data = serde_json::to_string_pretty(self)?;
         if let Some(parent) = path.parent() {
             std::fs::create_dir_all(parent)?;

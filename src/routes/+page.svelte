@@ -8,30 +8,22 @@
 </script>
 
 <header>
-  <h1>Twelvety</h1>
+  <h1>Fun Palace</h1>
+  <p class="tagline">Your sites, your web.</p>
 </header>
 
 <div class="actions">
   <a href="/new/wizard" class="action-card">
-    <div class="action-icon">&#10024;</div>
-    <div>
-      <h3>Create Your Site</h3>
-      <p>Guided wizard — we'll explain everything along the way.</p>
-    </div>
+    <h3>Create</h3>
+    <p>Guided setup — we'll walk you through it.</p>
   </a>
   <a href="/new/import" class="action-card">
-    <div class="action-icon">&#128194;</div>
-    <div>
-      <h3>Open Existing Site</h3>
-      <p>Import an Eleventy project and enhance it.</p>
-    </div>
+    <h3>Import</h3>
+    <p>Bring in an existing Eleventy project.</p>
   </a>
   <a href="/new/advanced" class="action-card">
-    <div class="action-icon">&#9881;&#65039;</div>
-    <div>
-      <h3>Advanced Create</h3>
-      <p>Quick form for experienced users.</p>
-    </div>
+    <h3>Quick Start</h3>
+    <p>All options on one form.</p>
   </a>
 </div>
 
@@ -46,7 +38,7 @@
       <div class="project-card">
         <div>
           <h3><a href="/project/{project.id}">{project.name}</a></h3>
-          <p class="meta">{project.template_lang} &middot; {project.css_approach}</p>
+          <p class="meta">{project.template_lang} · {project.css_approach}</p>
           <p class="path">{project.path}</p>
         </div>
         <button class="btn-danger" onclick={() => removeProject(project.id)}>Remove</button>
@@ -57,50 +49,72 @@
 
 <style>
   header {
-    margin-bottom: 2rem;
+    margin-bottom: 2.5rem;
+  }
+  h1 {
+    font-size: 1.75rem;
+    font-weight: 700;
+  }
+  .tagline {
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+    margin-top: 0.25rem;
   }
   .actions {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 1rem;
+    gap: 1px;
+    background: var(--color-border);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    overflow: hidden;
     margin-bottom: 2.5rem;
   }
   .action-card {
-    display: flex;
-    align-items: flex-start;
-    gap: 0.75rem;
     background: var(--color-surface);
-    border: 2px solid var(--color-border);
-    border-radius: 12px;
     padding: 1.25rem;
     text-decoration: none;
     color: var(--color-text);
-    transition: border-color 0.15s;
+    transition: background 0.15s;
   }
-  .action-card:hover { border-color: var(--color-primary); }
-  .action-icon { font-size: 1.5rem; flex-shrink: 0; }
-  .action-card h3 { font-size: 0.95rem; margin-bottom: 0.15rem; }
+  .action-card:hover { background: var(--color-bg); }
+  .action-card h3 {
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--color-primary);
+    margin-bottom: 0.35rem;
+  }
   .action-card p { color: var(--color-text-muted); font-size: 0.8rem; line-height: 1.4; }
-  .section-title { font-size: 1.125rem; margin-bottom: 1rem; color: var(--color-text-muted); }
+  .section-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-muted);
+    margin-bottom: 0.75rem;
+  }
   .project-list {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 1px;
+    background: var(--color-border);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    overflow: hidden;
   }
   .project-card {
     display: flex;
     justify-content: space-between;
     align-items: center;
     background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius);
-    padding: 1rem 1.5rem;
-    box-shadow: var(--shadow);
+    padding: 1rem 1.25rem;
   }
-  .project-card h3 { font-size: 1.125rem; }
+  .project-card h3 { font-size: 1rem; font-weight: 600; }
   .project-card h3 a { color: var(--color-text); text-decoration: none; }
   .project-card h3 a:hover { color: var(--color-primary); }
-  .meta { color: var(--color-text-muted); font-size: 0.875rem; }
-  .path { color: var(--color-text-muted); font-size: 0.75rem; font-family: monospace; }
+  .meta { color: var(--color-text-muted); font-size: 0.8rem; }
+  .path { color: var(--color-text-muted); font-size: 0.7rem; font-family: monospace; }
   .error { color: var(--color-danger); }
 </style>

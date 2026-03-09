@@ -1,11 +1,11 @@
 #![allow(dead_code)]
 
-use crate::TwelvetyError;
+use crate::FunPalaceError;
 use serde::{Deserialize, Serialize};
 use std::path::{Path, PathBuf};
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
-pub struct TwelvetyConfig {
+pub struct FunPalaceConfig {
     pub name: Option<String>,
     #[serde(rename = "eleventyVersion")]
     pub eleventy_version: Option<String>,
@@ -39,9 +39,9 @@ pub struct AuthorConfig {
 }
 
 /// Find the config file path in a project directory.
-/// Resolution order: twelvety.config.js -> .twelvety.js
+/// Resolution order: funpalace.config.js -> .funpalace.js
 pub fn find_config_file(project_dir: &Path) -> Option<PathBuf> {
-    let candidates = ["twelvety.config.js", ".twelvety.js"];
+    let candidates = ["funpalace.config.js", ".funpalace.js"];
     for name in &candidates {
         let path = project_dir.join(name);
         if path.exists() {
@@ -52,11 +52,11 @@ pub fn find_config_file(project_dir: &Path) -> Option<PathBuf> {
 }
 
 /// Read the config by evaluating the JS file with Node.
-pub fn read_config(project_dir: &Path, node_path: &str) -> Result<TwelvetyConfig, TwelvetyError> {
-    let config_path = find_config_file(project_dir).ok_or_else(|| TwelvetyError {
+pub fn read_config(project_dir: &Path, node_path: &str) -> Result<FunPalaceConfig, FunPalaceError> {
+    let config_path = find_config_file(project_dir).ok_or_else(|| FunPalaceError {
         code: "CONFIG_NOT_FOUND".to_string(),
         message: format!(
-            "No twelvety.config.js or .twelvety.js found in {}",
+            "No funpalace.config.js or .funpalace.js found in {}",
             project_dir.display()
         ),
     })?;
@@ -72,21 +72,21 @@ pub fn read_config(project_dir: &Path, node_path: &str) -> Result<TwelvetyConfig
         .arg(&script)
         .current_dir(project_dir)
         .output()
-        .map_err(|e| TwelvetyError {
+        .map_err(|e| FunPalaceError {
             code: "NODE_EXEC_ERROR".to_string(),
             message: format!("Failed to run Node: {}", e),
         })?;
 
     if !output.status.success() {
         let stderr = String::from_utf8_lossy(&output.stderr);
-        return Err(TwelvetyError {
+        return Err(FunPalaceError {
             code: "CONFIG_EVAL_ERROR".to_string(),
             message: format!("Failed to evaluate config: {}", stderr),
         });
     }
 
     let stdout = String::from_utf8_lossy(&output.stdout);
-    let config: TwelvetyConfig = serde_json::from_str(stdout.trim())?;
+    let config: FunPalaceConfig = serde_json::from_str(stdout.trim())?;
     Ok(config)
 }
 
@@ -96,22 +96,22 @@ mod tests {
     use std::fs;
 
     #[test]
-    fn test_find_config_prefers_twelvety_config_js() {
+    fn test_find_config_prefers_funpalace_config_js() {
         let dir = tempfile::tempdir().unwrap();
-        fs::write(dir.path().join("twelvety.config.js"), "").unwrap();
-        fs::write(dir.path().join(".twelvety.js"), "").unwrap();
+        fs::write(dir.path().join("funpalace.config.js"), "").unwrap();
+        fs::write(dir.path().join(".funpalace.js"), "").unwrap();
 
         let found = find_config_file(dir.path()).unwrap();
-        assert!(found.ends_with("twelvety.config.js"));
+        assert!(found.ends_with("funpalace.config.js"));
     }
 
     #[test]
     fn test_find_config_falls_back_to_dotfile() {
         let dir = tempfile::tempdir().unwrap();
-        fs::write(dir.path().join(".twelvety.js"), "").unwrap();
+        fs::write(dir.path().join(".funpalace.js"), "").unwrap();
 
         let found = find_config_file(dir.path()).unwrap();
-        assert!(found.ends_with(".twelvety.js"));
+        assert!(found.ends_with(".funpalace.js"));
     }
 
     #[test]
@@ -133,7 +133,7 @@ mod tests {
 
         let dir = tempfile::tempdir().unwrap();
         fs::write(
-            dir.path().join("twelvety.config.js"),
+            dir.path().join("funpalace.config.js"),
             r#"export default { name: "Test Site", templateLang: "nunjucks" };"#,
         )
         .unwrap();

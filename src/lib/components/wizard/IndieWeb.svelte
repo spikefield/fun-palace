@@ -2,7 +2,6 @@
   import { wizard, updateIndieweb } from '$lib/stores/wizard';
 </script>
 
-<div class="illustration">&#127760;</div>
 <h1>Welcome to the IndieWeb</h1>
 <p class="explanation">
   <strong>The IndieWeb is a movement to take back your content from big platforms.</strong>
@@ -12,15 +11,15 @@
 
 <div class="principles">
   <div class="principle">
-    <strong>&#127968; Own your data</strong>
+    <strong>Own your data</strong>
     <p>Your posts, photos, and thoughts live on YOUR domain. No platform can delete them or change the rules.</p>
   </div>
   <div class="principle">
-    <strong>&#128257; POSSE</strong>
+    <strong>POSSE</strong>
     <p>Publish on your Own Site, Syndicate Elsewhere. Post on your blog first, then share copies to social media.</p>
   </div>
   <div class="principle">
-    <strong>&#128279; Connected but independent</strong>
+    <strong>Connected but independent</strong>
     <p>IndieWeb sites can talk to each other — replies, likes, and mentions work across different websites.</p>
   </div>
 </div>
@@ -46,7 +45,7 @@
       onchange={(e) => updateIndieweb({ micropub: e.currentTarget.checked })}>
     <div>
       <strong>Micropub</strong>
-      <p>Post to your site from any app — not just Twelvety. It's like having an API for your blog.</p>
+      <p>Post to your site from any app — not just Fun Palace. It's like having an API for your blog.</p>
     </div>
   </label>
 
@@ -61,7 +60,6 @@
 </div>
 
 <style>
-  .illustration { font-size: 3rem; margin-bottom: 1rem; }
   h1 { font-size: 1.75rem; margin-bottom: 0.75rem; }
   h2 { font-size: 1.25rem; margin: 1.5rem 0 0.5rem; }
   .explanation { color: var(--color-text-muted); line-height: 1.7; margin-bottom: 1rem; }

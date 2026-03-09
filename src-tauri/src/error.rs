@@ -2,31 +2,31 @@ use serde::Serialize;
 use std::fmt;
 
 #[derive(Debug, Serialize)]
-pub struct TwelvetyError {
+pub struct FunPalaceError {
     pub code: String,
     pub message: String,
 }
 
-impl fmt::Display for TwelvetyError {
+impl fmt::Display for FunPalaceError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "[{}] {}", self.code, self.message)
     }
 }
 
-impl std::error::Error for TwelvetyError {}
+impl std::error::Error for FunPalaceError {}
 
-impl From<std::io::Error> for TwelvetyError {
+impl From<std::io::Error> for FunPalaceError {
     fn from(err: std::io::Error) -> Self {
-        TwelvetyError {
+        FunPalaceError {
             code: "IO_ERROR".to_string(),
             message: err.to_string(),
         }
     }
 }
 
-impl From<serde_json::Error> for TwelvetyError {
+impl From<serde_json::Error> for FunPalaceError {
     fn from(err: serde_json::Error) -> Self {
-        TwelvetyError {
+        FunPalaceError {
             code: "JSON_ERROR".to_string(),
             message: err.to_string(),
         }

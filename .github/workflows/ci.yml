@@ -66,7 +66,7 @@ jobs:
       - run: npx tauri build
       - uses: actions/upload-artifact@v4
         with:
-          name: twelvety-${{ matrix.target }}
+          name: fun-palace-${{ matrix.target }}
           path: |
             src-tauri/target/release/bundle/**/*.deb
             src-tauri/target/release/bundle/**/*.AppImage

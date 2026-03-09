@@ -2,5 +2,5 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 fn main() {
-    twelvety_lib::run();
+    fun_palace_lib::run();
 }

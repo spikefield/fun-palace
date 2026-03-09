@@ -33,7 +33,6 @@
   }
 </script>
 
-<div class="illustration">&#127912;</div>
 <h1>How should your templates work?</h1>
 <p class="explanation">
   Templates control how your content turns into web pages. Think of them like
@@ -60,7 +59,6 @@
 </div>
 
 <style>
-  .illustration { font-size: 3rem; margin-bottom: 1rem; }
   h1 { font-size: 1.75rem; margin-bottom: 0.75rem; }
   .explanation { color: var(--color-text-muted); line-height: 1.7; margin-bottom: 2rem; }
   .explanation strong { color: var(--color-text); }

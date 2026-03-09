@@ -4,7 +4,7 @@ mod error;
 mod models;
 mod process;
 
-pub use error::TwelvetyError;
+pub use error::FunPalaceError;
 
 use process::ProcessManager;
 
