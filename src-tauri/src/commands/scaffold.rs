@@ -84,7 +84,7 @@ fn rename_template_extensions(
     opts: &ScaffoldOptions,
 ) -> Result<(), FunPalaceError> {
     let ext = match opts.template_lang.as_str() {
-        "liquid" => "liquid",
+        "liquid" => "html",
         "webc" => "webc",
         _ => return Ok(()),
     };
