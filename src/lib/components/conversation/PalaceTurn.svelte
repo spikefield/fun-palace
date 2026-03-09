@@ -1,5 +1,6 @@
-<script>
-  let { done = false, children } = $props();
+<script lang="ts">
+  import type { Snippet } from 'svelte';
+  let { done = false, children }: { done?: boolean; children: Snippet } = $props();
 </script>
 
 <div class="palace-turn" class:done>
