@@ -78,10 +78,7 @@ fn customize_eleventy_config(
     let updated = content
         .replace(r#"["md", "njk", "html"]"#, formats)
         .replace(r#"markdownTemplateEngine: "njk""#, &format!("markdownTemplateEngine: {engine}"))
-        .replace(r#"htmlTemplateEngine: "njk""#, &format!("htmlTemplateEngine: {engine}"))
-        .replace(r#"title: "My Site""#, &format!(r#"title: "{}""#, opts.name))
-        .replace(r#"url: "https://example.com""#, &format!(r#"url: "{}""#, opts.site_url))
-        .replace(r#"author: "Your Name""#, &format!(r#"author: "{}""#, opts.author_name));
+        .replace(r#"htmlTemplateEngine: "njk""#, &format!("htmlTemplateEngine: {engine}"));
 
     std::fs::write(&config_path, updated)?;
     Ok(())
@@ -289,12 +286,7 @@ mod tests {
         let dir = tempfile::tempdir().unwrap();
         std::fs::write(
             dir.path().join("eleventy.config.js"),
-            r#"  const siteData = {
-    title: "My Site",
-    url: "https://example.com",
-    author: "Your Name",
-  };
-  return {
+            r#"  return {
     templateFormats: ["md", "njk", "html"],
     markdownTemplateEngine: "njk",
     htmlTemplateEngine: "njk",
@@ -319,9 +311,6 @@ mod tests {
         assert!(content.contains(r#"["md", "webc", "html"]"#));
         assert!(content.contains(r#"markdownTemplateEngine: "webc""#));
         assert!(content.contains(r#"htmlTemplateEngine: "webc""#));
-        assert!(content.contains(r#"title: "Alice's Garden""#));
-        assert!(content.contains(r#"url: "https://alice.example""#));
-        assert!(content.contains(r#"author: "Alice""#));
     }
 
     #[test]
