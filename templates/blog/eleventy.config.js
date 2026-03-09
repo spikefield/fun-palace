@@ -4,7 +4,7 @@ export default function (eleventyConfig) {
   const siteData = {
     title: "My Site",
     url: "https://example.com",
-    author: { name: "Your Name" },
+    author: "Your Name",
   };
 
   eleventyConfig.addPlugin(feedPlugin, {
