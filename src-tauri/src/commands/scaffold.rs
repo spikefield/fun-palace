@@ -60,25 +60,33 @@ fn customize_eleventy_config(
         return Ok(());
     }
 
+    // Template formats: always keep njk (plugins generate virtual .njk templates).
+    // Non-traditional formats (webc, jsx, mdx, ts) are added alongside njk but
+    // cannot serve as markdownTemplateEngine or htmlTemplateEngine.
     let (formats, engine) = match opts.template_lang.as_str() {
-        "liquid" => (r#"["md", "liquid", "html"]"#, r#""liquid""#),
-        "webc" => (r#"["md", "webc", "html"]"#, r#""webc""#),
-        "jsx" => (r#"["md", "11ty.jsx", "html"]"#, r#""11ty.jsx""#),
-        "mdx" => (r#"["md", "mdx", "html"]"#, r#""mdx""#),
-        "typescript" => (r#"["md", "11ty.ts", "html"]"#, r#""11ty.ts""#),
-        "handlebars" => (r#"["md", "hbs", "html"]"#, r#""hbs""#),
-        "pug" => (r#"["md", "pug", "html"]"#, r#""pug""#),
-        "mustache" => (r#"["md", "mustache", "html"]"#, r#""mustache""#),
-        "ejs" => (r#"["md", "ejs", "html"]"#, r#""ejs""#),
-        "haml" => (r#"["md", "haml", "html"]"#, r#""haml""#),
-        _ => (r#"["md", "njk", "html"]"#, r#""njk""#),
+        // Traditional template engines — replace njk as the engine
+        "liquid" => (r#"["md", "njk", "liquid", "html"]"#, Some(r#""liquid""#)),
+        "handlebars" => (r#"["md", "njk", "hbs", "html"]"#, Some(r#""hbs""#)),
+        "pug" => (r#"["md", "njk", "pug", "html"]"#, Some(r#""pug""#)),
+        "mustache" => (r#"["md", "njk", "mustache", "html"]"#, Some(r#""mustache""#)),
+        "ejs" => (r#"["md", "njk", "ejs", "html"]"#, Some(r#""ejs""#)),
+        "haml" => (r#"["md", "njk", "haml", "html"]"#, Some(r#""haml""#)),
+        // Non-traditional formats — add to formats but keep njk as engine
+        "webc" => (r#"["md", "njk", "webc", "html"]"#, None),
+        "jsx" => (r#"["md", "njk", "11ty.jsx", "html"]"#, None),
+        "mdx" => (r#"["md", "njk", "mdx", "html"]"#, None),
+        "typescript" => (r#"["md", "njk", "11ty.ts", "html"]"#, None),
+        // Nunjucks (default) — no changes needed
+        _ => (r#"["md", "njk", "html"]"#, None),
     };
 
     let content = std::fs::read_to_string(&config_path)?;
-    let updated = content
-        .replace(r#"["md", "njk", "html"]"#, formats)
-        .replace(r#"markdownTemplateEngine: "njk""#, &format!("markdownTemplateEngine: {engine}"))
-        .replace(r#"htmlTemplateEngine: "njk""#, &format!("htmlTemplateEngine: {engine}"));
+    let mut updated = content.replace(r#"["md", "njk", "html"]"#, formats);
+    if let Some(eng) = engine {
+        updated = updated
+            .replace(r#"markdownTemplateEngine: "njk""#, &format!("markdownTemplateEngine: {eng}"))
+            .replace(r#"htmlTemplateEngine: "njk""#, &format!("htmlTemplateEngine: {eng}"));
+    }
 
     std::fs::write(&config_path, updated)?;
     Ok(())
@@ -308,9 +316,11 @@ mod tests {
         customize_eleventy_config(dir.path(), &opts).unwrap();
 
         let content = std::fs::read_to_string(dir.path().join("eleventy.config.js")).unwrap();
-        assert!(content.contains(r#"["md", "webc", "html"]"#));
-        assert!(content.contains(r#"markdownTemplateEngine: "webc""#));
-        assert!(content.contains(r#"htmlTemplateEngine: "webc""#));
+        // WebC added to formats alongside njk (plugins need njk)
+        assert!(content.contains(r#"["md", "njk", "webc", "html"]"#));
+        // Engine stays as njk — WebC is not a traditional template engine
+        assert!(content.contains(r#"markdownTemplateEngine: "njk""#));
+        assert!(content.contains(r#"htmlTemplateEngine: "njk""#));
     }
 
     #[test]
