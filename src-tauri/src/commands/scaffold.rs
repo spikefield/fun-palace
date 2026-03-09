@@ -63,6 +63,14 @@ fn customize_eleventy_config(
     let (formats, engine) = match opts.template_lang.as_str() {
         "liquid" => (r#"["md", "liquid", "html"]"#, r#""liquid""#),
         "webc" => (r#"["md", "webc", "html"]"#, r#""webc""#),
+        "jsx" => (r#"["md", "11ty.jsx", "html"]"#, r#""11ty.jsx""#),
+        "mdx" => (r#"["md", "mdx", "html"]"#, r#""mdx""#),
+        "typescript" => (r#"["md", "11ty.ts", "html"]"#, r#""11ty.ts""#),
+        "handlebars" => (r#"["md", "hbs", "html"]"#, r#""hbs""#),
+        "pug" => (r#"["md", "pug", "html"]"#, r#""pug""#),
+        "mustache" => (r#"["md", "mustache", "html"]"#, r#""mustache""#),
+        "ejs" => (r#"["md", "ejs", "html"]"#, r#""ejs""#),
+        "haml" => (r#"["md", "haml", "html"]"#, r#""haml""#),
         _ => (r#"["md", "njk", "html"]"#, r#""njk""#),
     };
 
@@ -84,8 +92,17 @@ fn rename_template_extensions(
     opts: &ScaffoldOptions,
 ) -> Result<(), FunPalaceError> {
     let ext = match opts.template_lang.as_str() {
+        "nunjucks" => return Ok(()),
         "liquid" => "html",
         "webc" => "webc",
+        "jsx" => "11ty.jsx",
+        "mdx" => "mdx",
+        "typescript" => "11ty.ts",
+        "handlebars" => "hbs",
+        "pug" => "pug",
+        "mustache" => "mustache",
+        "ejs" => "ejs",
+        "haml" => "haml",
         _ => return Ok(()),
     };
 
