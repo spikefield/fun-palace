@@ -93,7 +93,7 @@ fn rename_template_extensions(
 ) -> Result<(), FunPalaceError> {
     let ext = match opts.template_lang.as_str() {
         "nunjucks" => return Ok(()),
-        "liquid" => "html",
+        "liquid" => "liquid",
         "webc" => "webc",
         "jsx" => "11ty.jsx",
         "mdx" => "mdx",
