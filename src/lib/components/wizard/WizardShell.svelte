@@ -20,8 +20,6 @@
   <div class="nav">
     {#if $wizard.step > 0}
       <button class="btn btn-back" onclick={prevStep}>&larr; Back</button>
-    {:else}
-      <a href="/" class="btn btn-back">&larr; Dashboard</a>
     {/if}
     {#if $wizard.step < totalSteps - 1}
       <button class="btn btn-next" onclick={nextStep} disabled={!$canAdvance}>Next &rarr;</button>

@@ -51,6 +51,31 @@ fn customize_site_data(project_dir: &Path, opts: &ScaffoldOptions) -> Result<(),
     Ok(())
 }
 
+fn customize_eleventy_config(
+    project_dir: &Path,
+    opts: &ScaffoldOptions,
+) -> Result<(), TwelvetyError> {
+    let config_path = project_dir.join("eleventy.config.js");
+    if !config_path.exists() {
+        return Ok(());
+    }
+
+    let (formats, engine) = match opts.template_lang.as_str() {
+        "liquid" => (r#"["md", "liquid", "html"]"#, r#""liquid""#),
+        "webc" => (r#"["md", "webc", "html"]"#, r#""webc""#),
+        _ => (r#"["md", "njk", "html"]"#, r#""njk""#),
+    };
+
+    let content = std::fs::read_to_string(&config_path)?;
+    let updated = content
+        .replace(r#"["md", "njk", "html"]"#, formats)
+        .replace(r#"markdownTemplateEngine: "njk""#, &format!("markdownTemplateEngine: {engine}"))
+        .replace(r#"htmlTemplateEngine: "njk""#, &format!("htmlTemplateEngine: {engine}"));
+
+    std::fs::write(&config_path, updated)?;
+    Ok(())
+}
+
 fn write_twelvety_config(project_dir: &Path, opts: &ScaffoldOptions) -> Result<(), TwelvetyError> {
     let config = format!(
         r#"export default {{
@@ -115,6 +140,7 @@ pub async fn scaffold_project(
 
     copy_dir_recursive(&template_dir, &options.directory)?;
     customize_site_data(&options.directory, &options)?;
+    customize_eleventy_config(&options.directory, &options)?;
     write_twelvety_config(&options.directory, &options)?;
 
     // Install dependencies
@@ -205,5 +231,62 @@ mod tests {
 
         assert_eq!(data["title"], "Cool Blog");
         assert_eq!(data["author"]["name"], "Alice");
+    }
+
+    #[test]
+    fn test_customize_eleventy_config_webc() {
+        let dir = tempfile::tempdir().unwrap();
+        std::fs::write(
+            dir.path().join("eleventy.config.js"),
+            r#"  return {
+    templateFormats: ["md", "njk", "html"],
+    markdownTemplateEngine: "njk",
+    htmlTemplateEngine: "njk",
+  };"#,
+        )
+        .unwrap();
+
+        let opts = ScaffoldOptions {
+            name: "Test".to_string(),
+            directory: dir.path().to_path_buf(),
+            starter: "blog".to_string(),
+            template_lang: "webc".to_string(),
+            css: "vanilla".to_string(),
+            author_name: "".to_string(),
+            author_url: "".to_string(),
+            site_url: "".to_string(),
+        };
+
+        customize_eleventy_config(dir.path(), &opts).unwrap();
+
+        let content = std::fs::read_to_string(dir.path().join("eleventy.config.js")).unwrap();
+        assert!(content.contains(r#"["md", "webc", "html"]"#));
+        assert!(content.contains(r#"markdownTemplateEngine: "webc""#));
+        assert!(content.contains(r#"htmlTemplateEngine: "webc""#));
+    }
+
+    #[test]
+    fn test_customize_eleventy_config_nunjucks_unchanged() {
+        let dir = tempfile::tempdir().unwrap();
+        let original = r#"    templateFormats: ["md", "njk", "html"],
+    markdownTemplateEngine: "njk",
+    htmlTemplateEngine: "njk","#;
+        std::fs::write(dir.path().join("eleventy.config.js"), original).unwrap();
+
+        let opts = ScaffoldOptions {
+            name: "Test".to_string(),
+            directory: dir.path().to_path_buf(),
+            starter: "blog".to_string(),
+            template_lang: "nunjucks".to_string(),
+            css: "vanilla".to_string(),
+            author_name: "".to_string(),
+            author_url: "".to_string(),
+            site_url: "".to_string(),
+        };
+
+        customize_eleventy_config(dir.path(), &opts).unwrap();
+
+        let content = std::fs::read_to_string(dir.path().join("eleventy.config.js")).unwrap();
+        assert_eq!(content, original);
     }
 }

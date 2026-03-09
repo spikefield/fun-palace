@@ -64,7 +64,7 @@
 </script>
 
 <header>
-  <a href="/new/wizard">&larr; Back to wizard</a>
+  <a href="/">&larr; Dashboard</a>
   <h1>Open Existing Site</h1>
 </header>
 

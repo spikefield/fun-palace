@@ -12,6 +12,10 @@
   onMount(() => resetWizard());
 </script>
 
+<header>
+  <a href="/">&larr; Dashboard</a>
+</header>
+
 <WizardShell>
   {#if $wizard.step === 0}
     <Identity />
@@ -27,3 +31,8 @@
     <Review />
   {/if}
 </WizardShell>
+
+<style>
+  header { margin-bottom: 2rem; }
+  header a { color: var(--color-text-muted); text-decoration: none; }
+</style>
