@@ -4,6 +4,7 @@
   import { invoke } from '@tauri-apps/api/core';
   import { projects, loadProjects } from '$lib/stores/projects';
   import { wizard, resetWizard, updateIdentity, updateSite, updateIndieweb } from '$lib/stores/wizard';
+  import { Thread, PalaceTurn, UserTurn, Choices, Choice, Fields, Summary } from '$lib/components/conversation';
   import type { ProjectEntry, ScaffoldOptions } from '$lib/types';
 
   type Flow = 'idle' | 'create' | 'import';
@@ -86,7 +87,6 @@
         importStage = 'error';
       }
     } else {
-      // User cancelled — go back to idle
       flow = 'idle';
     }
   }
@@ -119,7 +119,7 @@
   async function advanceCreate() {
     createStep++;
     await tick();
-    scrollToBottom();
+    setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 50);
   }
 
   async function pickDirectory() {
@@ -163,17 +163,12 @@
     }
   }
 
-  function scrollToBottom() {
-    setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 50);
-  }
-
   function startOver() {
     flow = 'idle';
     createStep = 0;
     resetWizard();
   }
 
-  // Validation helpers
   let canContinueIdentity = $derived(
     $wizard.identity.name.trim() !== '' && $wizard.identity.url.trim() !== ''
   );
@@ -182,28 +177,23 @@
   );
 </script>
 
-<div class="thread">
-  <!-- Turn 1: Welcome -->
-  <div class="palace-turn">
+<Thread>
+  <PalaceTurn>
     <p class="greeting">Welcome to <strong>Fun Palace</strong>.</p>
-    <p class="body">Your sites, your web. What would you like to do?</p>
-  </div>
+    <p>Your sites, your web. What would you like to do?</p>
+  </PalaceTurn>
 
   {#if ready}
     {#if flow === 'idle'}
-      <div class="choices">
-        <button class="choice" onclick={startCreate}>
-          Create a new site
-        </button>
-        <button class="choice choice-muted" onclick={startImport}>
-          Import an existing site
-        </button>
-      </div>
+      <Choices>
+        <Choice onclick={startCreate}>Create a new site</Choice>
+        <Choice muted onclick={startImport}>Import an existing site</Choice>
+      </Choices>
 
       {#if $projects.length > 0}
-        <div class="palace-turn">
-          <p class="body">Or pick up where you left off:</p>
-        </div>
+        <PalaceTurn>
+          <p>Or pick up where you left off:</p>
+        </PalaceTurn>
         <div class="site-list">
           {#each $projects as project}
             <button class="site-item" onclick={() => goto(`/project/${project.id}`)}>
@@ -215,56 +205,54 @@
 
     {:else if flow === 'import'}
       {#if importStage === 'detecting'}
-        <div class="palace-turn">
-          <p class="body">Scanning {importDir}...</p>
+        <PalaceTurn>
+          <p>Scanning {importDir}...</p>
           <div class="spinner"></div>
-        </div>
+        </PalaceTurn>
       {:else if importStage === 'report' && importResult}
-        <div class="palace-turn">
+        <PalaceTurn>
           {#if !importResult.is_eleventy}
-            <p class="body">This doesn't look like an Eleventy project — no config file or @11ty/eleventy dependency was found. You can still add it, but it may not work as expected.</p>
+            <p>This doesn't look like an Eleventy project — no config file or @11ty/eleventy dependency was found. You can still add it, but it may not work as expected.</p>
           {:else}
-            <p class="body">Found an Eleventy project.</p>
+            <p>Found an Eleventy project.</p>
           {/if}
 
-          <div class="summary">
-            <div class="row"><span class="label">Location</span><span class="value mono">{importDir}</span></div>
-            <div class="row"><span class="label">Template language</span><span class="value">{importResult.template_lang || 'Not detected'}</span></div>
-            <div class="row"><span class="label">Markdown files</span><span class="value">{importResult.post_count}</span></div>
-            <div class="row"><span class="label">IndieWeb markup</span><span class="value">{importResult.has_indieweb_markup ? 'Found' : 'Not found'}</span></div>
-            <div class="row"><span class="label">Feeds</span><span class="value">{importResult.has_feeds ? 'Found' : 'Not found'}</span></div>
-          </div>
+          <Summary rows={[
+            { label: 'Location', value: importDir, mono: true },
+            { label: 'Template language', value: importResult.template_lang || 'Not detected' },
+            { label: 'Markdown files', value: String(importResult.post_count) },
+            { label: 'IndieWeb markup', value: importResult.has_indieweb_markup ? 'Found' : 'Not found' },
+            { label: 'Feeds', value: importResult.has_feeds ? 'Found' : 'Not found' },
+          ]} />
 
-          <div class="choices">
-            <button class="choice" onclick={registerImport} disabled={registering}>
+          <Choices>
+            <Choice onclick={registerImport} disabled={registering}>
               {registering ? 'Adding...' : 'Add to Fun Palace'}
-            </button>
-            <button class="choice choice-muted" onclick={pickImportDir}>Choose different folder</button>
-            <button class="choice choice-muted" onclick={startOver}>Start over</button>
-          </div>
-        </div>
+            </Choice>
+            <Choice muted onclick={pickImportDir}>Choose different folder</Choice>
+            <Choice muted onclick={startOver}>Start over</Choice>
+          </Choices>
+        </PalaceTurn>
       {:else if importStage === 'error'}
-        <div class="palace-turn">
-          <p class="body error">{importError}</p>
-          <div class="choices">
-            <button class="choice" onclick={pickImportDir}>Try again</button>
-            <button class="choice choice-muted" onclick={startOver}>Start over</button>
-          </div>
-        </div>
+        <PalaceTurn>
+          <p class="error">{importError}</p>
+          <Choices>
+            <Choice onclick={pickImportDir}>Try again</Choice>
+            <Choice muted onclick={startOver}>Start over</Choice>
+          </Choices>
+        </PalaceTurn>
       {/if}
 
     {:else if flow === 'create'}
       <!-- Step 0: Identity -->
       {#if createStep >= 0}
         {#if createStep > 0}
-          <!-- Completed summary -->
-          <div class="palace-turn done"><p class="body">Who are you on the web?</p></div>
-          <div class="user-turn">{$wizard.identity.name} · {$wizard.identity.url}</div>
+          <PalaceTurn done><p>Who are you on the web?</p></PalaceTurn>
+          <UserTurn>{$wizard.identity.name} · {$wizard.identity.url}</UserTurn>
         {:else}
-          <!-- Active -->
-          <div class="palace-turn">
-            <p class="body">First, who are you on the web? On the indieweb, your identity lives on your own domain.</p>
-            <div class="fields">
+          <PalaceTurn>
+            <p>First, who are you on the web? On the indieweb, your identity lives on your own domain.</p>
+            <Fields>
               <label>
                 <span class="field-label">Your Name</span>
                 <input type="text" value={$wizard.identity.name}
@@ -283,23 +271,23 @@
                   oninput={(e) => updateIdentity({ email: e.currentTarget.value })}
                   placeholder="alice@example.com">
               </label>
-            </div>
-            <div class="choices">
-              <button class="choice" onclick={advanceCreate} disabled={!canContinueIdentity}>Continue</button>
-            </div>
-          </div>
+            </Fields>
+            <Choices>
+              <Choice onclick={advanceCreate} disabled={!canContinueIdentity}>Continue</Choice>
+            </Choices>
+          </PalaceTurn>
         {/if}
       {/if}
 
       <!-- Step 1: Site basics -->
       {#if createStep >= 1}
         {#if createStep > 1}
-          <div class="palace-turn done"><p class="body">What should we call your site?</p></div>
-          <div class="user-turn">{$wizard.site.name}</div>
+          <PalaceTurn done><p>What should we call your site?</p></PalaceTurn>
+          <UserTurn>{$wizard.site.name}</UserTurn>
         {:else}
-          <div class="palace-turn">
-            <p class="body">Nice to meet you, {$wizard.identity.name}. What should we call your site?</p>
-            <div class="fields">
+          <PalaceTurn>
+            <p>Nice to meet you, {$wizard.identity.name}. What should we call your site?</p>
+            <Fields>
               <label>
                 <span class="field-label">Site Name</span>
                 <input type="text" value={$wizard.site.name}
@@ -310,83 +298,81 @@
                 <span class="field-label">Save Location</span>
                 <div class="dir-picker">
                   <input type="text" value={$wizard.site.directory} placeholder="Choose a folder..." readonly>
-                  <button class="choice" onclick={pickDirectory}>Browse</button>
+                  <Choice onclick={pickDirectory}>Browse</Choice>
                 </div>
               </label>
-            </div>
-            <div class="choices">
-              <button class="choice" onclick={advanceCreate} disabled={!canContinueSite}>Continue</button>
-            </div>
-          </div>
+            </Fields>
+            <Choices>
+              <Choice onclick={advanceCreate} disabled={!canContinueSite}>Continue</Choice>
+            </Choices>
+          </PalaceTurn>
         {/if}
       {/if}
 
       <!-- Step 2: Template language -->
       {#if createStep >= 2}
         {#if createStep > 2}
-          <div class="palace-turn done"><p class="body">How should your templates work?</p></div>
-          <div class="user-turn">{templateOptions.find(t => t.value === $wizard.templateLang)?.name ?? $wizard.templateLang}</div>
+          <PalaceTurn done><p>How should your templates work?</p></PalaceTurn>
+          <UserTurn>{templateOptions.find(t => t.value === $wizard.templateLang)?.name ?? $wizard.templateLang}</UserTurn>
         {:else}
-          <div class="palace-turn">
-            <p class="body">How should your templates work? Templates control how your content turns into web pages — like mail merge for the web.</p>
-            <div class="choices">
+          <PalaceTurn>
+            <p>How should your templates work? Templates control how your content turns into web pages — like mail merge for the web.</p>
+            <Choices>
               {#each templateOptions as opt}
-                <button
-                  class="choice"
-                  class:selected={$wizard.templateLang === opt.value}
+                <Choice
+                  selected={$wizard.templateLang === opt.value}
                   onclick={() => selectTemplate(opt.value)}
                 >
-                  {opt.name}{#if opt.recommended} ·  recommended{/if}
-                </button>
+                  {opt.name}{#if opt.recommended} · recommended{/if}
+                </Choice>
               {/each}
-            </div>
-            <div class="choices" style="margin-top: 0.75rem;">
-              <button class="choice" onclick={advanceCreate}>Continue with {templateOptions.find(t => t.value === $wizard.templateLang)?.name}</button>
-            </div>
-          </div>
+            </Choices>
+            <Choices>
+              <Choice onclick={advanceCreate}>Continue with {templateOptions.find(t => t.value === $wizard.templateLang)?.name}</Choice>
+            </Choices>
+          </PalaceTurn>
         {/if}
       {/if}
 
       <!-- Step 3: CSS -->
       {#if createStep >= 3}
         {#if createStep > 3}
-          <div class="palace-turn done"><p class="body">How do you want to style it?</p></div>
-          <div class="user-turn">{cssOptions.find(c => c.value === $wizard.css)?.name ?? $wizard.css}</div>
+          <PalaceTurn done><p>How do you want to style it?</p></PalaceTurn>
+          <UserTurn>{cssOptions.find(c => c.value === $wizard.css)?.name ?? $wizard.css}</UserTurn>
         {:else}
-          <div class="palace-turn">
-            <p class="body">And how do you want to style your site?</p>
-            <div class="choices">
+          <PalaceTurn>
+            <p>And how do you want to style your site?</p>
+            <Choices>
               {#each cssOptions as opt}
-                <button
-                  class="choice"
-                  class:selected={$wizard.css === opt.value}
+                <Choice
+                  selected={$wizard.css === opt.value}
                   onclick={() => selectCss(opt.value)}
                 >
                   {opt.name}{#if opt.recommended} · recommended{/if}
-                </button>
+                </Choice>
               {/each}
-            </div>
-            <div class="choices" style="margin-top: 0.75rem;">
-              <button class="choice" onclick={advanceCreate}>Continue with {cssOptions.find(c => c.value === $wizard.css)?.name}</button>
-            </div>
-          </div>
+            </Choices>
+            <Choices>
+              <Choice onclick={advanceCreate}>Continue with {cssOptions.find(c => c.value === $wizard.css)?.name}</Choice>
+            </Choices>
+          </PalaceTurn>
         {/if}
       {/if}
 
       <!-- Step 4: IndieWeb -->
       {#if createStep >= 4}
         {#if createStep > 4}
-          <div class="palace-turn done"><p class="body">IndieWeb features?</p></div>
-          <div class="user-turn">
+          <PalaceTurn done><p>IndieWeb features?</p></PalaceTurn>
+          <UserTurn>
             {[
               $wizard.indieweb.webmention && 'Webmention',
               $wizard.indieweb.micropub && 'Micropub',
               $wizard.indieweb.indieauth && 'IndieAuth',
             ].filter(Boolean).join(', ') || 'None'}
-          </div>
+          </UserTurn>
         {:else}
-          <div class="palace-turn">
-            <p class="body">Almost there. The IndieWeb lets your site talk to others — replies, likes, and mentions work across different websites.</p>
+          <PalaceTurn>
+            <p>Almost there. The IndieWeb lets your site talk to others — replies, likes, and mentions work across different websites.</p>
             <div class="toggles">
               <label class="toggle">
                 <input type="checkbox" checked={$wizard.indieweb.webmention}
@@ -413,178 +399,77 @@
                 </div>
               </label>
             </div>
-            <div class="choices" style="margin-top: 0.75rem;">
-              <button class="choice" onclick={advanceCreate}>Continue</button>
-            </div>
-          </div>
+            <Choices>
+              <Choice onclick={advanceCreate}>Continue</Choice>
+            </Choices>
+          </PalaceTurn>
         {/if}
       {/if}
 
       <!-- Step 5: Review & Create -->
       {#if createStep >= 5}
-        <div class="palace-turn">
-          <p class="body">Here's what we're building:</p>
-          <div class="summary">
-            <div class="row"><span class="label">Your name</span><span class="value">{$wizard.identity.name}</span></div>
-            <div class="row"><span class="label">Your URL</span><span class="value">{$wizard.identity.url}</span></div>
-            <div class="row"><span class="label">Site name</span><span class="value">{$wizard.site.name}</span></div>
-            <div class="row"><span class="label">Location</span><span class="value mono">{$wizard.site.directory}</span></div>
-            <div class="row"><span class="label">Templates</span><span class="value">{templateOptions.find(t => t.value === $wizard.templateLang)?.name}</span></div>
-            <div class="row"><span class="label">Styling</span><span class="value">{cssOptions.find(c => c.value === $wizard.css)?.name}</span></div>
-            <div class="row">
-              <span class="label">IndieWeb</span>
-              <span class="value">{[
-                $wizard.indieweb.webmention && 'Webmention',
-                $wizard.indieweb.micropub && 'Micropub',
-                $wizard.indieweb.indieauth && 'IndieAuth',
-              ].filter(Boolean).join(', ') || 'None'}</span>
-            </div>
-          </div>
+        <PalaceTurn>
+          <p>Here's what we're building:</p>
+          <Summary rows={[
+            { label: 'Your name', value: $wizard.identity.name },
+            { label: 'Your URL', value: $wizard.identity.url },
+            { label: 'Site name', value: $wizard.site.name },
+            { label: 'Location', value: $wizard.site.directory, mono: true },
+            { label: 'Templates', value: templateOptions.find(t => t.value === $wizard.templateLang)?.name ?? $wizard.templateLang },
+            { label: 'Styling', value: cssOptions.find(c => c.value === $wizard.css)?.name ?? $wizard.css },
+            { label: 'IndieWeb', value: [
+              $wizard.indieweb.webmention && 'Webmention',
+              $wizard.indieweb.micropub && 'Micropub',
+              $wizard.indieweb.indieauth && 'IndieAuth',
+            ].filter(Boolean).join(', ') || 'None' },
+          ]} />
 
           {#if createError}
-            <p class="body error">{createError}</p>
+            <p class="error">{createError}</p>
           {/if}
 
-          <div class="choices">
-            <button class="choice" onclick={createSite} disabled={creating}>
+          <Choices>
+            <Choice onclick={createSite} disabled={creating}>
               {creating ? 'Creating...' : 'Create site'}
-            </button>
-            <button class="choice choice-muted" onclick={startOver}>Start over</button>
-          </div>
-        </div>
+            </Choice>
+            <Choice muted onclick={startOver}>Start over</Choice>
+          </Choices>
+        </PalaceTurn>
       {/if}
     {/if}
   {/if}
-</div>
+</Thread>
 
 <style>
-  .thread {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-    padding-top: 15vh;
-    padding-bottom: 4rem;
-  }
-
-  /* Palace turns — left-aligned, monospace */
-  .palace-turn {
-    font-family: var(--font-palace);
-  }
-  .palace-turn.done {
-    opacity: 0.5;
-  }
-
   .greeting {
     font-size: 1.25rem;
     margin-bottom: 0.75rem;
     color: var(--color-text);
   }
-  .greeting strong {
-    font-weight: 600;
-  }
 
-  .body {
-    color: var(--color-text-muted);
-    line-height: 1.8;
-    font-size: 0.85rem;
-  }
-
-  /* User turns — right-aligned, sans-serif */
-  .user-turn {
-    font-family: var(--font-user);
-    align-self: flex-end;
-    background: var(--color-primary);
-    color: white;
-    padding: 0.5rem 1rem;
-    border-radius: 999px;
-    font-size: 0.8rem;
-    font-weight: 500;
-    max-width: 80%;
-  }
-
-  /* Choices — pill buttons */
-  .choices {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin-top: 0.75rem;
-  }
-
-  .choice {
-    font-family: var(--font-user);
-    padding: 0.5rem 1rem;
-    background: transparent;
-    border: 1px solid var(--color-border);
-    border-radius: 999px;
-    color: var(--color-text);
-    font-weight: 500;
-    font-size: 0.8rem;
-    cursor: pointer;
-    transition: border-color 0.15s, background 0.15s;
-  }
-  .choice:hover:not(:disabled) {
-    border-color: var(--color-primary);
-    background: var(--color-surface);
-  }
-  .choice:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-  }
-  .choice.selected {
-    border-color: var(--color-primary);
-    background: var(--color-primary);
-    color: white;
-  }
-  .choice-muted {
-    color: var(--color-text-muted);
-  }
-
-  /* Form fields */
-  .fields {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    margin-top: 0.75rem;
-  }
-
-  label {
+  .site-list {
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
   }
-
-  .field-label {
-    font-family: var(--font-palace);
-    font-size: 0.75rem;
-    color: var(--color-text-muted);
-  }
-  .optional {
-    opacity: 0.6;
-  }
-
-  input {
+  .site-item {
     font-family: var(--font-user);
+    text-align: left;
     padding: 0.5rem 0.75rem;
-    border: 1px solid var(--color-border);
+    background: transparent;
+    border: none;
     border-radius: var(--radius);
-    font-size: 0.85rem;
-    background: var(--color-surface);
     color: var(--color-text);
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s;
   }
-  input:focus {
-    outline: none;
-    border-color: var(--color-primary);
-  }
-
-  .dir-picker {
-    display: flex;
-    gap: 0.5rem;
-  }
-  .dir-picker input {
-    flex: 1;
+  .site-item:hover {
+    background: var(--color-surface);
   }
 
-  /* Toggles */
+  /* Toggles — page-specific since only used here */
   .toggles {
     display: flex;
     flex-direction: column;
@@ -618,53 +503,8 @@
     line-height: 1.4;
   }
 
-  /* Summary table */
-  .summary {
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius);
-    padding: 0.75rem;
-    margin-top: 0.75rem;
-    font-family: var(--font-user);
-  }
-  .row {
-    display: flex;
-    justify-content: space-between;
-    padding: 0.35rem 0;
-    border-bottom: 1px solid var(--color-border);
-  }
-  .row:last-child { border-bottom: none; }
-  .label { color: var(--color-text-muted); font-size: 0.8rem; }
-  .value { font-weight: 500; font-size: 0.8rem; }
-  .mono { font-family: var(--font-palace); font-size: 0.75rem; }
-
-  /* Error */
   .error { color: var(--color-danger); }
 
-  /* Site list */
-  .site-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-  }
-  .site-item {
-    font-family: var(--font-user);
-    text-align: left;
-    padding: 0.5rem 0.75rem;
-    background: transparent;
-    border: none;
-    border-radius: var(--radius);
-    color: var(--color-text);
-    font-size: 0.85rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background 0.15s;
-  }
-  .site-item:hover {
-    background: var(--color-surface);
-  }
-
-  /* Spinner */
   .spinner {
     width: 24px;
     height: 24px;
