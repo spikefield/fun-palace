@@ -1,4 +1,4 @@
-# Twelvety
+# Fun Palace
 
 Native cross-platform desktop app for generating and managing Eleventy static sites with indieweb support.
 
@@ -25,12 +25,12 @@ Native cross-platform desktop app for generating and managing Eleventy static si
 - `cd src-tauri && cargo fmt --check` — Check Rust formatting
 
 ## Conventions
-- Rust: snake_case, `Result<T, TwelvetyError>` for all commands
+- Rust: snake_case, `Result<T, FunPalaceError>` for all commands
 - TypeScript: camelCase, strict mode
 - Svelte: Svelte 5 runes syntax ($state, $derived, $effect)
 - All Tauri IPC commands defined in `src-tauri/src/commands/` modules
 - Frontend calls backend via `invoke()` from `@tauri-apps/api/core`
-- Config resolution order: `twelvety.config.js` → `.twelvety.js`
+- Config resolution order: `funpalace.config.js` → `.funpalace.js`
 - Eleventy config: `eleventy.config.js` (ESM)
 - All starter templates include indieweb microformats markup
 

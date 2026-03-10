@@ -1,5 +1,7 @@
 <script lang="ts">
   import { invoke } from '@tauri-apps/api/core';
+  import { goto } from '$app/navigation';
+  import { Thread, PalaceTurn, Choices, Choice, Summary } from '$lib/components/conversation';
   import type { ProjectEntry } from '$lib/types';
 
   let { data } = $props();
@@ -14,12 +16,18 @@
     try {
       const projects = await invoke<ProjectEntry[]>('list_projects');
       project = projects.find((p) => p.id === data.projectId) ?? null;
-      if (project) {
-        serving = await invoke<boolean>('eleventy_status', { projectId: data.projectId });
-      }
     } catch (e: unknown) {
       const err = e as { message?: string };
       errorMsg = err.message ?? 'Failed to load project';
+      return;
+    }
+    if (project) {
+      try {
+        serving = await invoke<boolean>('eleventy_status', { projectId: data.projectId });
+      } catch {
+        // Status check can fail silently — just means not serving
+        serving = false;
+      }
     }
   }
 
@@ -27,7 +35,6 @@
     try {
       await invoke('eleventy_serve', { projectId: data.projectId });
       serving = true;
-      // Give Eleventy a moment to start, then open browser
       setTimeout(async () => {
         const { open } = await import('@tauri-apps/plugin-shell');
         await open('http://localhost:8080');
@@ -68,56 +75,69 @@
   });
 </script>
 
-<header>
-  <a href="/">&larr; All Projects</a>
-</header>
+<Thread>
+  {#if !project}
+    <PalaceTurn><p>Loading project...</p></PalaceTurn>
+  {:else}
+    <PalaceTurn>
+      <p class="project-name">{project.name}</p>
+      <Summary rows={[
+        { label: 'Location', value: String(project.path), mono: true },
+        { label: 'Templates', value: project.template_lang },
+        { label: 'Styling', value: project.css_approach },
+      ]} />
+    </PalaceTurn>
 
-{#if !project}
-  <p>Loading project...</p>
-{:else}
-  <h1>{project.name}</h1>
-  <p class="path">{project.path}</p>
-  <p class="meta">{project.template_lang} &middot; {project.css_approach}</p>
+    <PalaceTurn>
+      <p>What would you like to do?</p>
+      <Choices>
+        {#if serving}
+          <Choice onclick={stopServe}>Stop dev server</Choice>
+        {:else}
+          <Choice onclick={startServe}>Start dev server</Choice>
+        {/if}
+        <Choice onclick={runBuild} disabled={building}>
+          {building ? 'Building...' : 'Build'}
+        </Choice>
+        <Choice muted onclick={() => goto('/')}>Back to home</Choice>
+      </Choices>
+    </PalaceTurn>
 
-  <div class="actions">
-    {#if serving}
-      <button class="btn-danger" onclick={stopServe}>Stop Server</button>
-    {:else}
-      <button class="btn-primary" onclick={startServe}>Start Dev Server</button>
+    {#if errorMsg}
+      <PalaceTurn>
+        <p>Something went wrong:</p>
+        <pre class="output error">{errorMsg}</pre>
+        <Choices>
+          <Choice onclick={() => { errorMsg = ''; }}>Dismiss</Choice>
+        </Choices>
+      </PalaceTurn>
     {/if}
 
-    <button class="btn-primary" onclick={runBuild} disabled={building}>
-      {building ? 'Building...' : 'Build'}
-    </button>
-  </div>
-
-  {#if errorMsg}
-    <pre class="error">{errorMsg}</pre>
+    {#if buildOutput}
+      <PalaceTurn>
+        <p>Build complete:</p>
+        <pre class="output">{buildOutput}</pre>
+      </PalaceTurn>
+    {/if}
   {/if}
-
-  {#if buildOutput}
-    <details open>
-      <summary>Build Output</summary>
-      <pre class="output">{buildOutput}</pre>
-    </details>
-  {/if}
-{/if}
+</Thread>
 
 <style>
-  header { margin-bottom: 1rem; }
-  header a { color: var(--color-text-muted); text-decoration: none; }
-  h1 { margin-bottom: 0.25rem; }
-  .path { font-family: monospace; font-size: 0.75rem; color: var(--color-text-muted); }
-  .meta { color: var(--color-text-muted); font-size: 0.875rem; margin-bottom: 1.5rem; }
-  .actions { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; }
-  .output, .error {
+  .project-name {
+    font-size: 1.25rem;
+    color: var(--color-text);
+    font-weight: 600;
+  }
+  .error { color: var(--color-danger); }
+  .output {
     background: var(--color-surface);
     border: 1px solid var(--color-border);
     border-radius: var(--radius);
     padding: 1rem;
     font-size: 0.75rem;
+    font-family: var(--font-palace);
     overflow-x: auto;
     white-space: pre-wrap;
+    margin-top: 0.5rem;
   }
-  .error { color: var(--color-danger); }
 </style>

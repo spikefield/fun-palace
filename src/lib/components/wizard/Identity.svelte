@@ -2,7 +2,6 @@
   import { wizard, updateIdentity } from '$lib/stores/wizard';
 </script>
 
-<div class="illustration">&#128100;</div>
 <h1>Who are you on the web?</h1>
 <p class="explanation">
   On the indieweb, <strong>your identity lives on your own domain</strong> — not
@@ -61,7 +60,6 @@
 {/if}
 
 <style>
-  .illustration { font-size: 3rem; margin-bottom: 1rem; }
   h1 { font-size: 1.75rem; margin-bottom: 0.75rem; }
   .explanation { color: var(--color-text-muted); line-height: 1.7; margin-bottom: 1rem; }
   .explanation strong { color: var(--color-text); }

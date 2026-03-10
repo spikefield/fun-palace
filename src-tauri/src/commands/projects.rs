@@ -1,5 +1,5 @@
 use crate::models::project::{ProjectEntry, ProjectRegistry};
-use crate::TwelvetyError;
+use crate::FunPalaceError;
 use tauri::AppHandle;
 use tauri::Manager;
 
@@ -11,14 +11,14 @@ fn registry_path(app: &AppHandle) -> std::path::PathBuf {
 }
 
 #[tauri::command]
-pub async fn list_projects(app: AppHandle) -> Result<Vec<ProjectEntry>, TwelvetyError> {
+pub async fn list_projects(app: AppHandle) -> Result<Vec<ProjectEntry>, FunPalaceError> {
     let path = registry_path(&app);
     let registry = ProjectRegistry::load(&path)?;
     Ok(registry.projects)
 }
 
 #[tauri::command]
-pub async fn add_project(app: AppHandle, entry: ProjectEntry) -> Result<(), TwelvetyError> {
+pub async fn add_project(app: AppHandle, entry: ProjectEntry) -> Result<(), FunPalaceError> {
     let path = registry_path(&app);
     let mut registry = ProjectRegistry::load(&path)?;
     registry.add(entry);
@@ -27,7 +27,7 @@ pub async fn add_project(app: AppHandle, entry: ProjectEntry) -> Result<(), Twel
 }
 
 #[tauri::command]
-pub async fn remove_project(app: AppHandle, id: String) -> Result<(), TwelvetyError> {
+pub async fn remove_project(app: AppHandle, id: String) -> Result<(), FunPalaceError> {
     let path = registry_path(&app);
     let mut registry = ProjectRegistry::load(&path)?;
     registry.remove(&id);

@@ -37,8 +37,7 @@
   }
 </script>
 
-<div class="illustration">&#127881;</div>
-<h1>Ready to create your site!</h1>
+<h1>Ready to create your site</h1>
 <p class="explanation">Here's a summary of your choices. You can go back to change anything.</p>
 
 <div class="summary">
@@ -87,7 +86,6 @@
 </button>
 
 <style>
-  .illustration { font-size: 3rem; margin-bottom: 1rem; }
   h1 { font-size: 1.75rem; margin-bottom: 0.75rem; }
   .explanation { color: var(--color-text-muted); margin-bottom: 1.5rem; }
   .summary {

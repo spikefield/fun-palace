@@ -8,7 +8,7 @@
     template_lang: string | null;
     post_count: number;
     has_indieweb_markup: boolean;
-    has_twelvety_config: boolean;
+    has_funpalace_config: boolean;
     has_feeds: boolean;
   }
 
@@ -70,7 +70,6 @@
 
 {#if stage === 'pick'}
   <div class="center">
-    <div class="illustration">&#128194;</div>
     <h2>Choose your Eleventy project folder</h2>
     <p class="explanation">
       Select the root directory of your existing Eleventy site.
@@ -89,7 +88,7 @@
   <div class="report">
     {#if !result.is_eleventy}
       <div class="warning">
-        <strong>&#9888;&#65039; This doesn't look like an Eleventy project</strong>
+        <strong>This doesn't look like an Eleventy project</strong>
         <p>No eleventy config file or @11ty/eleventy dependency was found. You can still register it, but it may not work as expected.</p>
       </div>
     {/if}
@@ -119,8 +118,8 @@
         <span class="value">{result.has_indieweb_markup ? 'Found' : 'Not found'}</span>
       </div>
       <div class="row">
-        <span class="label">Twelvety config</span>
-        <span class="value">{result.has_twelvety_config ? 'Found' : 'Not found'}</span>
+        <span class="label">Fun Palace config</span>
+        <span class="value">{result.has_funpalace_config ? 'Found' : 'Not found'}</span>
       </div>
       <div class="row">
         <span class="label">Feeds</span>
@@ -130,7 +129,7 @@
 
     <div class="actions">
       <button class="btn-primary btn-large" onclick={registerProject} disabled={registering}>
-        {registering ? 'Adding...' : 'Add to Twelvety'}
+        {registering ? 'Adding...' : 'Add to Fun Palace'}
       </button>
       <button class="btn-secondary" onclick={() => { stage = 'pick'; result = null; }}>
         Choose different folder
@@ -149,7 +148,6 @@
   header { margin-bottom: 2rem; }
   header a { color: var(--color-text-muted); text-decoration: none; }
   .center { text-align: center; padding: 3rem 0; }
-  .illustration { font-size: 3rem; margin-bottom: 1rem; }
   .explanation { color: var(--color-text-muted); line-height: 1.7; margin-bottom: 2rem; max-width: 480px; margin-left: auto; margin-right: auto; }
   .btn-large { padding: 0.75rem 2rem; font-size: 1rem; }
   .btn-secondary { background: var(--color-surface); border: 1px solid var(--color-border); color: var(--color-text); padding: 0.5rem 1rem; border-radius: var(--radius); cursor: pointer; }

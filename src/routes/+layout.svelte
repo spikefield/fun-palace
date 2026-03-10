@@ -1,16 +1,26 @@
-<script>
+<script lang="ts">
+  import type { Snippet } from 'svelte';
   import '../app.css';
-  let { children } = $props();
+  let { children }: { children: Snippet } = $props();
 </script>
 
 <div class="app">
-  {@render children()}
+  <div class="content">
+    {@render children()}
+  </div>
 </div>
 
 <style>
   .app {
-    max-width: 960px;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+  .content {
+    flex: 1;
+    max-width: 600px;
+    width: 100%;
     margin: 0 auto;
-    padding: 2rem 1rem;
+    padding: 0 1.5rem 3rem;
   }
 </style>

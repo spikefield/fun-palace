@@ -1,17 +1,17 @@
 [package]
-name = "twelvety"
+name = "fun-palace"
 version = "0.1.0"
 description = "Native cross-platform Eleventy site manager with indieweb support"
 authors = []
 license = "MIT"
-repository = "https://github.com/twelvety/twelvety"
+repository = "https://github.com/funpalace/fun-palace"
 edition = "2021"
 rust-version = "1.77.2"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [lib]
-name = "twelvety_lib"
+name = "fun_palace_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]

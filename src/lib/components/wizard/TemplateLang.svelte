@@ -6,25 +6,79 @@
       value: 'webc',
       name: 'WebC',
       recommended: true,
-      desc: 'Web-native components using plain HTML custom elements. No special syntax to learn — if you know HTML, you know WebC. The simplest and most modern option.',
+      desc: 'Web-native components using plain HTML custom elements. If you know HTML, you know WebC.',
       preview: '<site-header></site-header>',
       tag: 'Eleventy-native, just HTML',
     },
     {
       value: 'nunjucks',
       name: 'Nunjucks',
-      recommended: false,
-      desc: 'The most popular choice for Eleventy. Powerful features like template inheritance and macros. Lots of documentation and community examples.',
+      desc: 'The most popular choice for Eleventy. Template inheritance, macros, lots of examples.',
       preview: '{{ title }}',
-      tag: 'Most popular, well-documented',
+      tag: 'Most popular',
     },
     {
       value: 'liquid',
       name: 'Liquid',
-      recommended: false,
-      desc: 'Simpler and beginner-friendly. Originally from Shopify. Great if you\'ve used Jekyll or Shopify themes before.',
+      desc: 'Simple and beginner-friendly. Originally from Shopify, also used by Jekyll.',
       preview: '{{ page.title }}',
-      tag: 'Used by: Shopify, Jekyll sites',
+      tag: 'Shopify, Jekyll',
+    },
+    {
+      value: 'jsx',
+      name: 'JSX',
+      desc: 'React-style templates. Write components with JavaScript and JSX syntax.',
+      preview: '<h1>{data.title}</h1>',
+      tag: 'React-style',
+    },
+    {
+      value: 'mdx',
+      name: 'MDX',
+      desc: 'Markdown with embedded JSX components. Mix prose with interactive elements.',
+      preview: '# Hello <Counter />',
+      tag: 'Markdown + JSX',
+    },
+    {
+      value: 'typescript',
+      name: 'TypeScript',
+      desc: 'Type-safe JavaScript templates. Full TypeScript support in your template files.',
+      preview: 'export default (data: Data) =>',
+      tag: 'Type-safe',
+    },
+    {
+      value: 'handlebars',
+      name: 'Handlebars',
+      desc: 'Logic-less templates with helpers. Familiar to many web developers.',
+      preview: '{{#each posts}}',
+      tag: 'Logic-less',
+    },
+    {
+      value: 'pug',
+      name: 'Pug',
+      desc: 'Indentation-based HTML shorthand. Minimal syntax, no closing tags.',
+      preview: 'h1= title',
+      tag: 'Concise',
+    },
+    {
+      value: 'mustache',
+      name: 'Mustache',
+      desc: 'Logic-less templates. The simplest template syntax — just variables and sections.',
+      preview: '{{title}}',
+      tag: 'Minimal',
+    },
+    {
+      value: 'ejs',
+      name: 'EJS',
+      desc: 'Embedded JavaScript. Plain JS inside HTML with <% %> tags.',
+      preview: '<%= title %>',
+      tag: 'Express.js default',
+    },
+    {
+      value: 'haml',
+      name: 'HAML',
+      desc: 'Clean, indentation-based markup. Popular in the Ruby world.',
+      preview: '%h1= title',
+      tag: 'Ruby-style',
     },
   ];
 
@@ -33,15 +87,11 @@
   }
 </script>
 
-<div class="illustration">&#127912;</div>
 <h1>How should your templates work?</h1>
 <p class="explanation">
   Templates control how your content turns into web pages. Think of them like
   <strong>mail merge</strong> — you write your blog post in plain text, and the
-  template wraps it in your site's design with headers, navigation, and footer.
-  <br><br>
-  Different template languages have different syntax for this. Don't worry —
-  you can always change later.
+  template wraps it in your site's design. You can always change later.
 </p>
 
 <div class="options">
@@ -60,21 +110,20 @@
 </div>
 
 <style>
-  .illustration { font-size: 3rem; margin-bottom: 1rem; }
   h1 { font-size: 1.75rem; margin-bottom: 0.75rem; }
   .explanation { color: var(--color-text-muted); line-height: 1.7; margin-bottom: 2rem; }
   .explanation strong { color: var(--color-text); }
-  .options { display: flex; flex-direction: column; gap: 0.75rem; }
+  .options { display: flex; flex-direction: column; gap: 0.5rem; }
   .option {
     text-align: left; width: 100%; background: var(--color-surface);
-    border: 2px solid var(--color-border); border-radius: 12px;
-    padding: 1.25rem; cursor: pointer; transition: all 0.15s; color: var(--color-text);
+    border: 2px solid var(--color-border); border-radius: var(--radius);
+    padding: 1rem; cursor: pointer; transition: all 0.15s; color: var(--color-text);
   }
   .option:hover { border-color: var(--color-primary); }
   .option.selected { border-color: var(--color-primary); background: var(--color-selected); }
-  .option h3 { font-size: 1rem; margin-bottom: 0.25rem; display: flex; align-items: center; gap: 0.5rem; }
-  .badge { font-size: 0.65rem; background: #4ade80; color: #000; padding: 0.15rem 0.5rem; border-radius: 99px; font-weight: 600; }
-  .option p { color: var(--color-text-muted); font-size: 0.85rem; line-height: 1.5; margin-bottom: 0.5rem; }
-  .preview { display: inline-block; font-size: 0.8rem; background: var(--color-border); padding: 0.25rem 0.5rem; border-radius: 4px; margin-bottom: 0.5rem; }
-  .tag { font-size: 0.7rem; color: var(--color-text-muted); background: var(--color-border); padding: 0.15rem 0.5rem; border-radius: 4px; }
+  .option h3 { font-size: 0.9rem; margin-bottom: 0.2rem; display: flex; align-items: center; gap: 0.5rem; }
+  .badge { font-size: 0.6rem; background: var(--color-primary); color: white; padding: 0.1rem 0.4rem; border-radius: 99px; font-weight: 600; }
+  .option p { color: var(--color-text-muted); font-size: 0.8rem; line-height: 1.4; margin-bottom: 0.35rem; }
+  .preview { display: inline-block; font-size: 0.75rem; background: var(--color-border); padding: 0.15rem 0.4rem; border-radius: 4px; margin-bottom: 0.35rem; }
+  .tag { font-size: 0.65rem; color: var(--color-text-muted); background: var(--color-border); padding: 0.1rem 0.4rem; border-radius: 4px; }
 </style>

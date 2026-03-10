@@ -1,5 +1,5 @@
 use crate::models::project::{ProjectEntry, ProjectRegistry};
-use crate::TwelvetyError;
+use crate::FunPalaceError;
 use serde::Deserialize;
 use std::path::{Path, PathBuf};
 use tauri::{AppHandle, Manager};
@@ -16,7 +16,7 @@ pub struct ScaffoldOptions {
     pub site_url: String,
 }
 
-fn copy_dir_recursive(src: &Path, dst: &Path) -> Result<(), TwelvetyError> {
+fn copy_dir_recursive(src: &Path, dst: &Path) -> Result<(), FunPalaceError> {
     std::fs::create_dir_all(dst)?;
     for entry in std::fs::read_dir(src)? {
         let entry = entry?;
@@ -31,7 +31,7 @@ fn copy_dir_recursive(src: &Path, dst: &Path) -> Result<(), TwelvetyError> {
     Ok(())
 }
 
-fn customize_site_data(project_dir: &Path, opts: &ScaffoldOptions) -> Result<(), TwelvetyError> {
+fn customize_site_data(project_dir: &Path, opts: &ScaffoldOptions) -> Result<(), FunPalaceError> {
     let site_json_path = project_dir.join("src/_data/site.json");
     if site_json_path.exists() {
         let mut data: serde_json::Value =
@@ -54,29 +54,84 @@ fn customize_site_data(project_dir: &Path, opts: &ScaffoldOptions) -> Result<(),
 fn customize_eleventy_config(
     project_dir: &Path,
     opts: &ScaffoldOptions,
-) -> Result<(), TwelvetyError> {
+) -> Result<(), FunPalaceError> {
     let config_path = project_dir.join("eleventy.config.js");
     if !config_path.exists() {
         return Ok(());
     }
 
+    // Template formats: always keep njk (plugins generate virtual .njk templates).
+    // Non-traditional formats (webc, jsx, mdx, ts) are added alongside njk but
+    // cannot serve as markdownTemplateEngine or htmlTemplateEngine.
     let (formats, engine) = match opts.template_lang.as_str() {
-        "liquid" => (r#"["md", "liquid", "html"]"#, r#""liquid""#),
-        "webc" => (r#"["md", "webc", "html"]"#, r#""webc""#),
-        _ => (r#"["md", "njk", "html"]"#, r#""njk""#),
+        // Traditional template engines — replace njk as the engine
+        "liquid" => (r#"["md", "njk", "liquid", "html"]"#, Some(r#""liquid""#)),
+        "handlebars" => (r#"["md", "njk", "hbs", "html"]"#, Some(r#""hbs""#)),
+        "pug" => (r#"["md", "njk", "pug", "html"]"#, Some(r#""pug""#)),
+        "mustache" => (r#"["md", "njk", "mustache", "html"]"#, Some(r#""mustache""#)),
+        "ejs" => (r#"["md", "njk", "ejs", "html"]"#, Some(r#""ejs""#)),
+        "haml" => (r#"["md", "njk", "haml", "html"]"#, Some(r#""haml""#)),
+        // Non-traditional formats — add to formats but keep njk as engine
+        "webc" => (r#"["md", "njk", "webc", "html"]"#, None),
+        "jsx" => (r#"["md", "njk", "11ty.jsx", "html"]"#, None),
+        "mdx" => (r#"["md", "njk", "mdx", "html"]"#, None),
+        "typescript" => (r#"["md", "njk", "11ty.ts", "html"]"#, None),
+        // Nunjucks (default) — no changes needed
+        _ => (r#"["md", "njk", "html"]"#, None),
     };
 
     let content = std::fs::read_to_string(&config_path)?;
-    let updated = content
-        .replace(r#"["md", "njk", "html"]"#, formats)
-        .replace(r#"markdownTemplateEngine: "njk""#, &format!("markdownTemplateEngine: {engine}"))
-        .replace(r#"htmlTemplateEngine: "njk""#, &format!("htmlTemplateEngine: {engine}"));
+    let mut updated = content.replace(r#"["md", "njk", "html"]"#, formats);
+    if let Some(eng) = engine {
+        updated = updated
+            .replace(r#"markdownTemplateEngine: "njk""#, &format!("markdownTemplateEngine: {eng}"))
+            .replace(r#"htmlTemplateEngine: "njk""#, &format!("htmlTemplateEngine: {eng}"));
+    }
 
     std::fs::write(&config_path, updated)?;
     Ok(())
 }
 
-fn write_twelvety_config(project_dir: &Path, opts: &ScaffoldOptions) -> Result<(), TwelvetyError> {
+fn rename_template_extensions(
+    project_dir: &Path,
+    opts: &ScaffoldOptions,
+) -> Result<(), FunPalaceError> {
+    let ext = match opts.template_lang.as_str() {
+        "nunjucks" => return Ok(()),
+        "liquid" => "liquid",
+        "webc" => "webc",
+        "jsx" => "11ty.jsx",
+        "mdx" => "mdx",
+        "typescript" => "11ty.ts",
+        "handlebars" => "hbs",
+        "pug" => "pug",
+        "mustache" => "mustache",
+        "ejs" => "ejs",
+        "haml" => "haml",
+        _ => return Ok(()),
+    };
+
+    rename_njk_files_recursive(&project_dir.join("src"), ext)
+}
+
+fn rename_njk_files_recursive(dir: &Path, new_ext: &str) -> Result<(), FunPalaceError> {
+    if !dir.exists() {
+        return Ok(());
+    }
+    for entry in std::fs::read_dir(dir)? {
+        let entry = entry?;
+        let path = entry.path();
+        if path.is_dir() {
+            rename_njk_files_recursive(&path, new_ext)?;
+        } else if path.extension().and_then(|e| e.to_str()) == Some("njk") {
+            let new_path = path.with_extension(new_ext);
+            std::fs::rename(&path, &new_path)?;
+        }
+    }
+    Ok(())
+}
+
+fn write_funpalace_config(project_dir: &Path, opts: &ScaffoldOptions) -> Result<(), FunPalaceError> {
     let config = format!(
         r#"export default {{
   name: "{}",
@@ -104,7 +159,7 @@ fn write_twelvety_config(project_dir: &Path, opts: &ScaffoldOptions) -> Result<(
         opts.author_name,
         opts.author_url,
     );
-    std::fs::write(project_dir.join("twelvety.config.js"), config)?;
+    std::fs::write(project_dir.join("funpalace.config.js"), config)?;
     Ok(())
 }
 
@@ -112,7 +167,7 @@ fn write_twelvety_config(project_dir: &Path, opts: &ScaffoldOptions) -> Result<(
 pub async fn scaffold_project(
     app: AppHandle,
     options: ScaffoldOptions,
-) -> Result<ProjectEntry, TwelvetyError> {
+) -> Result<ProjectEntry, FunPalaceError> {
     let resource_path = app
         .path()
         .resource_dir()
@@ -132,7 +187,7 @@ pub async fn scaffold_project(
     } else if dev_path.exists() {
         dev_path
     } else {
-        return Err(TwelvetyError {
+        return Err(FunPalaceError {
             code: "TEMPLATE_NOT_FOUND".to_string(),
             message: format!("Starter template '{}' not found", options.starter),
         });
@@ -141,20 +196,21 @@ pub async fn scaffold_project(
     copy_dir_recursive(&template_dir, &options.directory)?;
     customize_site_data(&options.directory, &options)?;
     customize_eleventy_config(&options.directory, &options)?;
-    write_twelvety_config(&options.directory, &options)?;
+    rename_template_extensions(&options.directory, &options)?;
+    write_funpalace_config(&options.directory, &options)?;
 
     // Install dependencies
     let install = std::process::Command::new("npm")
         .arg("install")
         .current_dir(&options.directory)
         .output()
-        .map_err(|e| TwelvetyError {
+        .map_err(|e| FunPalaceError {
             code: "NPM_INSTALL_ERROR".to_string(),
             message: format!("Failed to run npm install: {}", e),
         })?;
     if !install.status.success() {
         let stderr = String::from_utf8_lossy(&install.stderr);
-        return Err(TwelvetyError {
+        return Err(FunPalaceError {
             code: "NPM_INSTALL_FAILED".to_string(),
             message: format!("npm install failed:\n{}", stderr),
         });
@@ -247,6 +303,38 @@ mod tests {
         .unwrap();
 
         let opts = ScaffoldOptions {
+            name: "Alice's Garden".to_string(),
+            directory: dir.path().to_path_buf(),
+            starter: "blog".to_string(),
+            template_lang: "webc".to_string(),
+            css: "vanilla".to_string(),
+            author_name: "Alice".to_string(),
+            author_url: "https://alice.example".to_string(),
+            site_url: "https://alice.example".to_string(),
+        };
+
+        customize_eleventy_config(dir.path(), &opts).unwrap();
+
+        let content = std::fs::read_to_string(dir.path().join("eleventy.config.js")).unwrap();
+        // WebC added to formats alongside njk (plugins need njk)
+        assert!(content.contains(r#"["md", "njk", "webc", "html"]"#));
+        // Engine stays as njk — WebC is not a traditional template engine
+        assert!(content.contains(r#"markdownTemplateEngine: "njk""#));
+        assert!(content.contains(r#"htmlTemplateEngine: "njk""#));
+    }
+
+    #[test]
+    fn test_rename_template_extensions_webc() {
+        let dir = tempfile::tempdir().unwrap();
+        let src = dir.path().join("src");
+        let includes = src.join("_includes");
+        std::fs::create_dir_all(&includes).unwrap();
+        std::fs::write(src.join("index.njk"), "index").unwrap();
+        std::fs::write(src.join("about.njk"), "about").unwrap();
+        std::fs::write(includes.join("base.njk"), "base").unwrap();
+        std::fs::write(src.join("keep.md"), "markdown").unwrap();
+
+        let opts = ScaffoldOptions {
             name: "Test".to_string(),
             directory: dir.path().to_path_buf(),
             starter: "blog".to_string(),
@@ -257,12 +345,36 @@ mod tests {
             site_url: "".to_string(),
         };
 
-        customize_eleventy_config(dir.path(), &opts).unwrap();
+        rename_template_extensions(dir.path(), &opts).unwrap();
 
-        let content = std::fs::read_to_string(dir.path().join("eleventy.config.js")).unwrap();
-        assert!(content.contains(r#"["md", "webc", "html"]"#));
-        assert!(content.contains(r#"markdownTemplateEngine: "webc""#));
-        assert!(content.contains(r#"htmlTemplateEngine: "webc""#));
+        assert!(src.join("index.webc").exists());
+        assert!(src.join("about.webc").exists());
+        assert!(includes.join("base.webc").exists());
+        assert!(src.join("keep.md").exists());
+        assert!(!src.join("index.njk").exists());
+    }
+
+    #[test]
+    fn test_rename_template_extensions_nunjucks_noop() {
+        let dir = tempfile::tempdir().unwrap();
+        let src = dir.path().join("src");
+        std::fs::create_dir_all(&src).unwrap();
+        std::fs::write(src.join("index.njk"), "index").unwrap();
+
+        let opts = ScaffoldOptions {
+            name: "Test".to_string(),
+            directory: dir.path().to_path_buf(),
+            starter: "blog".to_string(),
+            template_lang: "nunjucks".to_string(),
+            css: "vanilla".to_string(),
+            author_name: "".to_string(),
+            author_url: "".to_string(),
+            site_url: "".to_string(),
+        };
+
+        rename_template_extensions(dir.path(), &opts).unwrap();
+
+        assert!(src.join("index.njk").exists());
     }
 
     #[test]

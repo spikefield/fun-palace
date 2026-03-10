@@ -30,7 +30,6 @@
   }
 </script>
 
-<div class="illustration">&#127912;</div>
 <h1>How do you want to style your site?</h1>
 <p class="explanation">
   <strong>CSS</strong> (Cascading Style Sheets) is how you control the look of your website —
@@ -53,7 +52,6 @@
 </div>
 
 <style>
-  .illustration { font-size: 3rem; margin-bottom: 1rem; }
   h1 { font-size: 1.75rem; margin-bottom: 0.75rem; }
   .explanation { color: var(--color-text-muted); line-height: 1.7; margin-bottom: 2rem; }
   .explanation strong { color: var(--color-text); }

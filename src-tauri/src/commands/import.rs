@@ -1,4 +1,4 @@
-use crate::TwelvetyError;
+use crate::FunPalaceError;
 use serde::Serialize;
 use std::path::{Path, PathBuf};
 
@@ -9,7 +9,7 @@ pub struct DetectionResult {
     pub template_lang: Option<String>,
     pub post_count: usize,
     pub has_indieweb_markup: bool,
-    pub has_twelvety_config: bool,
+    pub has_funpalace_config: bool,
     pub has_feeds: bool,
 }
 
@@ -102,7 +102,7 @@ pub fn detect_project(dir: &Path) -> DetectionResult {
                 .unwrap_or_default()
                 .contains("@11ty/eleventy");
 
-    let has_twelvety = crate::config::find_config_file(dir).is_some();
+    let has_funpalace = crate::config::find_config_file(dir).is_some();
     let has_feeds = dir.join("_site/feed.xml").exists()
         || dir.join("_site/feed.json").exists()
         || has_files_with_ext(dir, "xml");
@@ -113,16 +113,16 @@ pub fn detect_project(dir: &Path) -> DetectionResult {
         template_lang: detect_template_lang(dir),
         post_count: count_markdown_files(dir),
         has_indieweb_markup: check_indieweb_markup(dir),
-        has_twelvety_config: has_twelvety,
+        has_funpalace_config: has_funpalace,
         has_feeds,
     }
 }
 
 #[tauri::command]
-pub async fn detect_eleventy_project(directory: String) -> Result<DetectionResult, TwelvetyError> {
+pub async fn detect_eleventy_project(directory: String) -> Result<DetectionResult, FunPalaceError> {
     let path = PathBuf::from(&directory);
     if !path.exists() {
-        return Err(TwelvetyError {
+        return Err(FunPalaceError {
             code: "DIR_NOT_FOUND".to_string(),
             message: format!("Directory not found: {}", directory),
         });

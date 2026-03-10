@@ -1,22 +1,19 @@
+import { readFileSync } from "fs";
 import { feedPlugin } from "@11ty/eleventy-plugin-rss";
 
 export default function (eleventyConfig) {
-  const siteData = {
-    title: "My Site",
-    url: "https://example.com",
-    author: { name: "Your Name" },
-  };
+  const siteData = JSON.parse(readFileSync("src/_data/site.json", "utf-8"));
 
   eleventyConfig.addPlugin(feedPlugin, {
     type: "atom",
     outputPath: "/feed.xml",
     collection: { name: "posts", limit: 20 },
     metadata: {
-      language: "en",
+      language: siteData.language || "en",
       title: siteData.title,
-      subtitle: "",
+      subtitle: siteData.description || "",
       base: siteData.url,
-      author: siteData.author,
+      author: siteData.author?.name || siteData.author,
     },
   });
 
@@ -25,11 +22,11 @@ export default function (eleventyConfig) {
     outputPath: "/feed.json",
     collection: { name: "posts", limit: 20 },
     metadata: {
-      language: "en",
+      language: siteData.language || "en",
       title: siteData.title,
-      subtitle: "",
+      subtitle: siteData.description || "",
       base: siteData.url,
-      author: siteData.author,
+      author: siteData.author?.name || siteData.author,
     },
   });
 
